@@ -346,7 +346,7 @@
                             <option value="firstCitations">First Author Citations</option>
                             <option value="lastPapers">Last Author Papers</option>
                             <option value="lastCitations">Last Author Citations</option>
-                            <option value="yousemMetric">Yousem Metric</option>
+                            <option value="yousemMetric">RY Metric</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -456,7 +456,7 @@
     </div>
     
     <script>
-    const YOUSEM_TOOLTIP = '<span class="tooltip"><span class="tooltip-icon">?</span><span class="tooltip-text"><strong>Yousem Metric</strong><br>Weights first/last authorship 5× more than middle authorship.<br><br>Formula: (First+Last author citations × 5) + (Middle author citations) + 10 × [(First+Last author papers × 5) + (Middle author papers)]</span></span>';
+    const YOUSEM_TOOLTIP = '<span class="tooltip"><span class="tooltip-icon">?</span><span class="tooltip-text"><strong>RY Metric</strong><br>Weights first/last authorship 5× more than middle authorship.<br><br>Formula: (First+Last author citations × 5) + (Middle author citations) + 10 × [(First+Last author papers × 5) + (Middle author papers)]</span></span>';
     
     const METRICS = [
         { key: 'citations', label: 'Total Citations' },
@@ -466,7 +466,7 @@
         { key: 'firstCitations', label: 'First Author Citations' },
         { key: 'lastPapers', label: 'Last Author Papers' },
         { key: 'lastCitations', label: 'Last Author Citations' },
-        { key: 'yousemMetric', label: 'Yousem Metric', highlight: true, hasTooltip: true }
+        { key: 'yousemMetric', label: 'RY Metric', highlight: true, hasTooltip: true }
     ];
     
     const rankLabels = { '1': 'Assistant Professor', '2': 'Associate Professor', '3': 'Professor' };
