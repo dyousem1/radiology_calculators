@@ -23,7 +23,7 @@ Compare your scholarly metrics against peers in your radiology subspecialty. Eac
 | 🎗️ Breast Imaging | 509 | 94 | ✅ Live |
 | ☢️ Nuclear Medicine | 522 | 94 | ✅ Live |
 | 👶 Pediatric Radiology | 986 | 97 | ✅ Live |
-| 🩺 Interventional Radiology | 847 | 101 | ✅ Live |
+| 🩺 Interventional Radiology | 878 | 102 | ✅ Live |
 | 🫁 Abdominal Imaging | — | — | 🔄 In Development |
 | ❤️ Cardiothoracic | — | — | 🔄 In Development |
 
