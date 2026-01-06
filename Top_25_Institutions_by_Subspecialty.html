@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 25 Institutions by Subspecialty</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.4em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1em;
+            color: #94a3b8;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fbbf24;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        select:hover {
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+        }
+        
+        select option {
+            background: #1e293b;
+            color: white;
+        }
+        
+        .results-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .results-header {
+            background: rgba(251, 191, 36, 0.1);
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .results-header h2 {
+            color: #fbbf24;
+            font-size: 1.3em;
+        }
+        
+        .results-header .info {
+            color: #94a3b8;
+            font-size: 0.9em;
+        }
+        
+        .rankings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .rankings-table th {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 14px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .rankings-table th:first-child {
+            width: 60px;
+            text-align: center;
+        }
+        
+        .rankings-table th:last-child {
+            width: 100px;
+            text-align: right;
+        }
+        
+        .rankings-table th:nth-child(3) {
+            width: 80px;
+            text-align: center;
+        }
+        
+        .rankings-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .rankings-table tr:hover {
+            background: rgba(251, 191, 36, 0.05);
+        }
+        
+        .rankings-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .rank-cell {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        
+        .rank-1 { color: #fbbf24; }
+        .rank-2 { color: #d1d5db; }
+        .rank-3 { color: #cd7f32; }
+        
+        .institution-name {
+            font-weight: 500;
+        }
+        
+        .faculty-count {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9em;
+        }
+        
+        .metric-value {
+            text-align: right;
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #fbbf24;
+        }
+        
+        .top-badge {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+        
+        .badge-gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; }
+        .badge-silver { background: linear-gradient(135deg, #e5e7eb, #9ca3af); color: #000; }
+        .badge-bronze { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
+        
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        
+        .no-data .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .subspecialty-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-neuro { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .badge-msk { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .badge-breast { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+        .badge-nuclear { background: rgba(180, 83, 9, 0.2); color: #d97706; }
+        .badge-peds { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+        .badge-ir { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
+        .badge-abd { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+        .badge-ctr { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        
+        .metric-note {
+            font-size: 0.85em;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #64748b;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .control-row {
+                flex-direction: column;
+            }
+            .rankings-table th, .rankings-table td {
+                padding: 12px 10px;
+            }
+            .institution-name {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Top 25 Institutions</h1>
+            <p class="subtitle">Ranked by Subspecialty and Bibliometric Metric</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label>Subspecialty</label>
+                    <select id="subspecialty-select">
+                        <option value="Neuroradiology">🧠 Neuroradiology</option>
+                        <option value="MSK">🦴 MSK Radiology</option>
+                        <option value="Breast Imaging">🎗️ Breast Imaging</option>
+                        <option value="Nuclear Medicine">☢️ Nuclear Medicine</option>
+                        <option value="Pediatric Radiology">👶 Pediatric Radiology</option>
+                        <option value="Interventional Radiology">🩺 Interventional Radiology</option>
+                        <option value="Abdominal Imaging">🫁 Abdominal Imaging</option>
+                        <option value="Cardiothoracic Imaging">❤️ Cardiothoracic Imaging</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Metric</label>
+                    <select id="metric-select">
+                        <option value="papers">Total Papers</option>
+                        <option value="citations">Total Citations</option>
+                        <option value="papers_per_faculty">Papers Per Faculty</option>
+                        <option value="mean_h">Mean H-Index</option>
+                        <option value="median_h">Median H-Index</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-container">
+            <div class="results-header">
+                <h2 id="results-title">Top 25 Institutions</h2>
+                <span class="info" id="results-info"></span>
+            </div>
+            <div id="results-content">
+                <div class="no-data">
+                    <div class="icon">📊</div>
+                    <p>Select a subspecialty and metric to view rankings</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Data sourced from Scopus • Minimum 3 faculty for per-faculty and H-index metrics</p>
+            <p>© 2025 Johns Hopkins University School of Medicine</p>
+        </footer>
+    </div>
+
+    <script>
+    const DATA = {"Neuroradiology": {"total_institutions": 227, "rankings": {"papers": [["Mayo Clinic - Rochester", 8929.0, 52], ["Massachusetts General Hospital, Harvard Medical School", 2762.0, 33], ["University of California, San Francisco School of Medicine", 2564.0, 20], ["Perelman School of Medicine at the University of Pennsylvania", 2061.0, 34], ["University of Washington School of Medicine", 2059.0, 20], ["Johns Hopkins University School of Medicine", 1792.0, 15], ["Stanford University School of Medicine", 1781.0, 18], ["Washington University School of Medicine in St. Louis", 1690.0, 16], ["University of Wisconsin School of Medicine and Public Health", 1357.0, 19], ["University of Iowa Carver College of Medicine", 1351.0, 13], ["NYU Grossman School of Medicine", 1277.0, 22], ["Yale School of Medicine", 1223.0, 19], ["University of North Carolina at Chapel Hill School of Medicine", 1219.0, 10], ["Duke University School of Medicine", 1216.0, 14], ["Emory University School of Medicine", 1216.0, 20], ["University of Utah School of Medicine", 1122.0, 16], ["University of Michigan Medical School", 1071.0, 17], ["University of Texas Southwestern Medical Center", 929.0, 16], ["Brigham and Women's Hospital, Harvard Medical School", 917.0, 16], ["Mayo Clinic - Jacksonville", 913.0, 13], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 897.0, 12], ["University of California, Davis School of Medicine", 882.0, 8], ["Columbia University Vagelos College of Physicians and Surgeons", 840.0, 13], ["David Geffen School of Medicine at University of California, Los Angeles", 832.0, 11], ["Sidney Kimmel Medical College at Thomas Jefferson University", 817.0, 8]], "citations": [["Mayo Clinic - Rochester", 442432.0, 52], ["University of California, San Francisco School of Medicine", 131070.0, 20], ["Washington University School of Medicine in St. Louis", 118629.0, 16], ["Massachusetts General Hospital, Harvard Medical School", 111538.0, 33], ["University of Washington School of Medicine", 80833.0, 20], ["Stanford University School of Medicine", 78671.0, 18], ["Perelman School of Medicine at the University of Pennsylvania", 73037.0, 34], ["University of Wisconsin School of Medicine and Public Health", 66234.0, 19], ["Duke University School of Medicine", 60865.0, 14], ["University of Texas Southwestern Medical Center", 59986.0, 16], ["University of Iowa Carver College of Medicine", 56905.0, 13], ["Johns Hopkins University School of Medicine", 53695.0, 15], ["Yale School of Medicine", 48308.0, 19], ["NYU Grossman School of Medicine", 47211.0, 22], ["Emory University School of Medicine", 39112.0, 20], ["University of Utah School of Medicine", 36155.0, 16], ["David Geffen School of Medicine at University of California, Los Angeles", 35820.0, 11], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 35705.0, 12], ["Brigham and Women's Hospital, Harvard Medical School", 33027.0, 16], ["Sidney Kimmel Medical College at Thomas Jefferson University", 28412.0, 8], ["University of North Carolina at Chapel Hill School of Medicine", 27607.0, 10], ["Stony Brook University Renaissance School of Medicine", 26114.0, 6], ["The Warren Alpert Medical School of Brown University", 26087.0, 6], ["University of California, Irvine School of Medicine", 24858.0, 9], ["Columbia University Vagelos College of Physicians and Surgeons", 24850.0, 13]], "papers_per_faculty": [["Mayo Clinic - Rochester", 171.7, 52], ["University of California, San Francisco School of Medicine", 128.2, 20], ["University of North Carolina at Chapel Hill School of Medicine", 121.9, 10], ["Johns Hopkins University School of Medicine", 119.5, 15], ["University of California, Davis School of Medicine", 110.2, 8], ["Washington University School of Medicine in St. Louis", 105.6, 16], ["University of Iowa Carver College of Medicine", 103.9, 13], ["University of Washington School of Medicine", 103.0, 20], ["Sidney Kimmel Medical College at Thomas Jefferson University", 102.1, 8], ["Stanford University School of Medicine", 98.9, 18], ["Duke University School of Medicine", 86.9, 14], ["The Warren Alpert Medical School of Brown University", 86.2, 6], ["Massachusetts General Hospital, Harvard Medical School", 83.7, 33], ["Icahn School of Medicine at Mount Sinai", 82.4, 8], ["Stony Brook University Renaissance School of Medicine", 82.2, 6], ["David Geffen School of Medicine at University of California, Los Angeles", 75.6, 11], ["University of Maryland School of Medicine", 74.9, 9], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 74.8, 12], ["University of Miami Miller School of Medicine", 74.2, 10], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 73.0, 4], ["University of Wisconsin School of Medicine and Public Health", 71.4, 19], ["Mayo Clinic - Jacksonville", 70.2, 13], ["University of Utah School of Medicine", 70.1, 16], ["University of Illinois College of Medicine", 67.3, 6], ["Boston University Chobanian & Avedisian School of Medicine", 65.7, 9]], "mean_h": [["University of California, San Francisco School of Medicine", 36.3, 20], ["Mayo Clinic - Rochester", 31.8, 52], ["Washington University School of Medicine in St. Louis", 29.1, 16], ["The Warren Alpert Medical School of Brown University", 28.0, 6], ["Duke University School of Medicine", 27.3, 14], ["Johns Hopkins University School of Medicine", 26.5, 15], ["University of Washington School of Medicine", 25.5, 20], ["University of California, Davis School of Medicine", 25.2, 8], ["Stanford University School of Medicine", 25.2, 18], ["Sidney Kimmel Medical College at Thomas Jefferson University", 24.2, 8], ["University of Iowa Carver College of Medicine", 23.3, 13], ["Massachusetts General Hospital, Harvard Medical School", 22.7, 33], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 21.8, 4], ["Stony Brook University Renaissance School of Medicine", 21.2, 6], ["University of Wisconsin School of Medicine and Public Health", 21.0, 19], ["Cedars-Sinai Medical Center", 21.0, 5], ["David Geffen School of Medicine at University of California, Los Angeles", 20.9, 11], ["University of Utah School of Medicine", 20.9, 16], ["University of Texas Southwestern Medical Center", 20.8, 16], ["University of Miami Miller School of Medicine", 20.6, 10], ["University of California, Irvine School of Medicine", 20.6, 9], ["University of North Carolina at Chapel Hill School of Medicine", 20.2, 10], ["University of Rochester School of Medicine and Dentistry", 20.0, 8], ["University of South Florida Morsani College of Medicine", 19.0, 4], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 18.7, 12]], "median_h": [["University of California, San Francisco School of Medicine", 33.0, 20], ["The Warren Alpert Medical School of Brown University", 29.0, 6], ["University of California, Davis School of Medicine", 27.5, 8], ["Mayo Clinic - Rochester", 25.0, 52], ["Duke University School of Medicine", 24.5, 14], ["Stanford University School of Medicine", 24.0, 18], ["Washington University School of Medicine in St. Louis", 22.5, 16], ["University of South Florida Morsani College of Medicine", 22.0, 4], ["University of Washington School of Medicine", 21.5, 20], ["Sidney Kimmel Medical College at Thomas Jefferson University", 21.5, 8], ["Johns Hopkins University School of Medicine", 21.0, 15], ["Donald and Barbara Zucker School of Medicine at Hofstra/Northwell", 21.0, 5], ["Case Western Reserve University School of Medicine", 21.0, 7], ["University of Miami Miller School of Medicine", 20.5, 10], ["Cedars-Sinai Medical Center", 20.0, 5], ["University of North Carolina at Chapel Hill School of Medicine", 19.5, 10], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 19.5, 4], ["University of Texas Southwestern Medical Center", 19.0, 16], ["Massachusetts General Hospital, Harvard Medical School", 17.0, 33], ["University of Utah School of Medicine", 16.5, 16], ["University of Rochester School of Medicine and Dentistry", 16.0, 8], ["Albert Einstein College of Medicine", 16.0, 9], ["University of Iowa Carver College of Medicine", 15.0, 13], ["University of Arizona College of Medicine", 15.0, 5], ["Brigham and Women's Hospital, Harvard Medical School", 14.5, 16]]}}, "MSK": {"total_institutions": 93, "rankings": {"papers": [["Mayo Clinic - Rochester", 2666.0, 31], ["NYU Grossman School of Medicine", 1890.0, 36], ["University of California San Diego School of Medicine", 1793.0, 12], ["Massachusetts General Hospital, Harvard Medical School", 1155.0, 22], ["University of California, San Francisco School of Medicine", 1149.0, 8], ["Stanford University School of Medicine", 1086.0, 12], ["University of Michigan Medical School", 784.0, 12], ["University of Washington School of Medicine", 708.0, 12], ["Henry Ford Health", 701.0, 10], ["University of Texas Southwestern Medical Center", 653.0, 10], ["Johns Hopkins University School of Medicine", 628.0, 7], ["The University of Texas MD Anderson Cancer Center", 620.0, 7], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 552.0, 7], ["University of Wisconsin School of Medicine and Public Health", 490.0, 12], ["Perelman School of Medicine at the University of Pennsylvania", 488.0, 16], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 478.0, 15], ["University of California, Irvine School of Medicine", 429.0, 7], ["UMass Chan Medical School", 425.0, 13], ["Penn State College of Medicine", 397.0, 7], ["University of Maryland School of Medicine", 387.0, 6], ["University of Iowa Carver College of Medicine", 369.0, 9], ["Duke University School of Medicine", 352.0, 9], ["University of Miami Miller School of Medicine", 324.0, 5], ["University of Virginia School of Medicine", 314.0, 10], ["University of North Carolina at Chapel Hill School of Medicine", 292.0, 9]], "citations": [["Mayo Clinic - Rochester", 70112.0, 31], ["University of California San Diego School of Medicine", 61955.0, 12], ["NYU Grossman School of Medicine", 55848.0, 36], ["Stanford University School of Medicine", 47912.0, 12], ["University of California, San Francisco School of Medicine", 46074.0, 8], ["Massachusetts General Hospital, Harvard Medical School", 34028.0, 22], ["Henry Ford Health", 31591.0, 10], ["University of Michigan Medical School", 29915.0, 12], ["UMass Chan Medical School", 19972.0, 13], ["Perelman School of Medicine at the University of Pennsylvania", 18366.0, 16], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 17165.0, 7], ["The University of Texas MD Anderson Cancer Center", 16589.0, 7], ["Johns Hopkins University School of Medicine", 15721.0, 7], ["Duke University School of Medicine", 13923.0, 9], ["University of Wisconsin School of Medicine and Public Health", 13337.0, 12], ["University of Washington School of Medicine", 12579.0, 12], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 12322.0, 15], ["Penn State College of Medicine", 12099.0, 7], ["University of Texas Southwestern Medical Center", 11387.0, 10], ["Sidney Kimmel Medical College at Thomas Jefferson University", 10940.0, 3], ["University of North Carolina at Chapel Hill School of Medicine", 10393.0, 9], ["University of Iowa Carver College of Medicine", 10165.0, 9], ["University of Minnesota Medical School", 9468.0, 5], ["University of California, Irvine School of Medicine", 8374.0, 7], ["Icahn School of Medicine at Mount Sinai", 7609.0, 8]], "papers_per_faculty": [["University of California San Diego School of Medicine", 149.4, 12], ["University of California, San Francisco School of Medicine", 143.6, 8], ["Sidney Kimmel Medical College at Thomas Jefferson University", 97.0, 3], ["Stanford University School of Medicine", 90.5, 12], ["Johns Hopkins University School of Medicine", 89.7, 7], ["The University of Texas MD Anderson Cancer Center", 88.6, 7], ["Mayo Clinic - Rochester", 86.0, 31], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 78.9, 7], ["Henry Ford Health", 70.1, 10], ["University of Michigan Medical School", 65.3, 12], ["University of Texas Southwestern Medical Center", 65.3, 10], ["University of Miami Miller School of Medicine", 64.8, 5], ["University of Maryland School of Medicine", 64.5, 6], ["University of California, Irvine School of Medicine", 61.3, 7], ["University of Washington School of Medicine", 59.0, 12], ["Penn State College of Medicine", 56.7, 7], ["Mayo Clinic - Phoenix", 53.8, 5], ["University of Arkansas for Medical Sciences College of Medicine", 52.8, 4], ["Massachusetts General Hospital, Harvard Medical School", 52.5, 22], ["NYU Grossman School of Medicine", 52.5, 36], ["University of Chicago Pritzker School of Medicine", 47.7, 3], ["Mayo Clinic - Jacksonville", 43.5, 6], ["University of Iowa Carver College of Medicine", 41.0, 9], ["University of Wisconsin School of Medicine and Public Health", 40.8, 12], ["Duke University School of Medicine", 39.1, 9]], "mean_h": [["University of California, San Francisco School of Medicine", 27.5, 8], ["University of California San Diego School of Medicine", 27.2, 12], ["Stanford University School of Medicine", 25.8, 12], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 22.6, 7], ["Sidney Kimmel Medical College at Thomas Jefferson University", 22.3, 3], ["University of Michigan Medical School", 22.0, 12], ["Mayo Clinic - Rochester", 21.7, 31], ["Johns Hopkins University School of Medicine", 21.6, 7], ["The University of Texas MD Anderson Cancer Center", 21.3, 7], ["Henry Ford Health", 18.5, 10], ["Penn State College of Medicine", 17.0, 7], ["Massachusetts General Hospital, Harvard Medical School", 16.6, 22], ["University of Miami Miller School of Medicine", 15.6, 5], ["University of Chicago Pritzker School of Medicine", 15.0, 3], ["NYU Grossman School of Medicine", 14.6, 36], ["University of Maryland School of Medicine", 14.5, 6], ["University of California, Irvine School of Medicine", 13.9, 7], ["Mayo Clinic - Jacksonville", 13.5, 6], ["Duke University School of Medicine", 13.4, 9], ["University of Wisconsin School of Medicine and Public Health", 13.4, 12], ["UMass Chan Medical School", 13.3, 13], ["Cedars-Sinai Medical Center", 13.0, 3], ["University of Arkansas for Medical Sciences College of Medicine", 13.0, 4], ["Perelman School of Medicine at the University of Pennsylvania", 12.9, 16], ["University of Texas Southwestern Medical Center", 12.8, 10]], "median_h": [["Johns Hopkins University School of Medicine", 28.0, 7], ["Stanford University School of Medicine", 21.5, 12], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 21.0, 7], ["The University of Texas MD Anderson Cancer Center", 21.0, 7], ["University of Michigan Medical School", 20.5, 12], ["University of Chicago Pritzker School of Medicine", 19.0, 3], ["Mayo Clinic - Rochester", 18.5, 31], ["University of California, San Francisco School of Medicine", 17.0, 8], ["University of California San Diego School of Medicine", 16.5, 12], ["Massachusetts General Hospital, Harvard Medical School", 15.0, 22], ["University of Miami Miller School of Medicine", 15.0, 5], ["University of Arkansas for Medical Sciences College of Medicine", 14.0, 4], ["Mayo Clinic - Jacksonville", 13.5, 6], ["University of Maryland School of Medicine", 13.5, 6], ["Penn State College of Medicine", 12.0, 7], ["Joe R. and Teresa Lozano Long School of Medicine at UT Health San Antonio", 12.0, 3], ["University of Virginia School of Medicine", 12.0, 10], ["Mayo Clinic - Phoenix", 11.0, 5], ["Cedars-Sinai Medical Center", 10.0, 3], ["NYU Grossman School of Medicine", 10.0, 36], ["University of Texas Southwestern Medical Center", 10.0, 10], ["Virginia Commonwealth University School of Medicine", 10.0, 5], ["Boston University Chobanian & Avedisian School of Medicine", 9.0, 8], ["David Geffen School of Medicine at University of California, Los Angeles", 9.0, 9], ["University of Texas Medical Branch School of Medicine", 9.0, 4]]}}, "Breast Imaging": {"total_institutions": 107, "rankings": {"papers": [["The University of Texas MD Anderson Cancer Center", 1762.0, 32], ["Massachusetts General Hospital, Harvard Medical School", 908.0, 25], ["NYU Grossman School of Medicine", 839.0, 56], ["University of Wisconsin School of Medicine and Public Health", 785.0, 12], ["Weill Cornell Medicine", 742.0, 27], ["Duke University School of Medicine", 729.0, 15], ["University of Pittsburgh School of Medicine", 678.0, 17], ["Perelman School of Medicine at the University of Pennsylvania", 649.0, 16], ["Memorial Sloan Kettering Cancer Center", 572.0, 35], ["University of Washington School of Medicine", 566.0, 12], ["University of California, San Francisco School of Medicine", 548.0, 14], ["Columbia University Vagelos College of Physicians and Surgeons", 517.0, 16], ["Stanford University School of Medicine", 495.0, 11], ["Mayo Clinic - Rochester", 452.0, 14], ["University of Texas Southwestern Medical Center", 415.0, 17], ["The George Washington University School of Medicine and Health Sciences", 377.0, 7], ["Boston University Chobanian & Avedisian School of Medicine", 376.0, 7], ["University of Rochester School of Medicine and Dentistry", 332.0, 7], ["Yale School of Medicine", 328.0, 16], ["Northwestern University Feinberg School of Medicine", 325.0, 23], ["Johns Hopkins University School of Medicine", 325.0, 14], ["The Warren Alpert Medical School of Brown University", 305.0, 12], ["Vanderbilt University School of Medicine", 303.0, 16], ["University of Utah School of Medicine", 291.0, 9], ["University of California San Diego School of Medicine", 286.0, 9]], "citations": [["The University of Texas MD Anderson Cancer Center", 48081.0, 32], ["NYU Grossman School of Medicine", 35597.0, 56], ["University of Pittsburgh School of Medicine", 31958.0, 17], ["Massachusetts General Hospital, Harvard Medical School", 27165.0, 25], ["Stanford University School of Medicine", 23980.0, 11], ["Perelman School of Medicine at the University of Pennsylvania", 22904.0, 16], ["Duke University School of Medicine", 22053.0, 15], ["University of Wisconsin School of Medicine and Public Health", 18800.0, 12], ["University of Washington School of Medicine", 18477.0, 12], ["Columbia University Vagelos College of Physicians and Surgeons", 17581.0, 16], ["Weill Cornell Medicine", 16589.0, 27], ["University of Texas Southwestern Medical Center", 16279.0, 17], ["University of California, San Francisco School of Medicine", 16209.0, 14], ["Memorial Sloan Kettering Cancer Center", 15560.0, 35], ["University of Rochester School of Medicine and Dentistry", 12513.0, 7], ["Yale School of Medicine", 12377.0, 16], ["Northwestern University Feinberg School of Medicine", 12208.0, 23], ["Mayo Clinic - Rochester", 10456.0, 14], ["The Warren Alpert Medical School of Brown University", 10280.0, 12], ["University of Utah School of Medicine", 10265.0, 9], ["The George Washington University School of Medicine and Health Sciences", 10166.0, 7], ["Boston University Chobanian & Avedisian School of Medicine", 8193.0, 7], ["University of Michigan Medical School", 7308.0, 13], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 6930.0, 3], ["Emory University School of Medicine", 6806.0, 24]], "papers_per_faculty": [["University of Wisconsin School of Medicine and Public Health", 65.4, 12], ["The University of Texas MD Anderson Cancer Center", 55.1, 32], ["The George Washington University School of Medicine and Health Sciences", 53.9, 7], ["Boston University Chobanian & Avedisian School of Medicine", 53.7, 7], ["Duke University School of Medicine", 48.6, 15], ["University of Rochester School of Medicine and Dentistry", 47.4, 7], ["University of Washington School of Medicine", 47.2, 12], ["Stanford University School of Medicine", 45.0, 11], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 41.7, 3], ["Perelman School of Medicine at the University of Pennsylvania", 40.6, 16], ["University of Pittsburgh School of Medicine", 39.9, 17], ["University of California, San Francisco School of Medicine", 39.1, 14], ["Mayo Clinic - Phoenix", 37.3, 7], ["Massachusetts General Hospital, Harvard Medical School", 36.3, 25], ["University of Iowa Carver College of Medicine", 32.5, 6], ["University of Utah School of Medicine", 32.3, 9], ["Columbia University Vagelos College of Physicians and Surgeons", 32.3, 16], ["Mayo Clinic - Rochester", 32.3, 14], ["University of California San Diego School of Medicine", 31.8, 9], ["Weill Cornell Medicine", 27.5, 27], ["Penn State College of Medicine", 27.2, 8], ["The Warren Alpert Medical School of Brown University", 25.4, 12], ["University of Vermont Larner College of Medicine", 25.3, 3], ["University of California, Irvine School of Medicine", 24.8, 6], ["Medical University of South Carolina", 24.6, 10]], "mean_h": [["Stanford University School of Medicine", 18.9, 11], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 17.0, 3], ["University of Wisconsin School of Medicine and Public Health", 16.4, 12], ["University of Washington School of Medicine", 15.2, 12], ["University of Rochester School of Medicine and Dentistry", 15.2, 7], ["The George Washington University School of Medicine and Health Sciences", 14.7, 7], ["University of Pittsburgh School of Medicine", 14.7, 17], ["The University of Texas MD Anderson Cancer Center", 14.6, 32], ["Duke University School of Medicine", 14.5, 15], ["Mayo Clinic - Phoenix", 13.6, 7], ["Perelman School of Medicine at the University of Pennsylvania", 13.4, 16], ["Massachusetts General Hospital, Harvard Medical School", 13.3, 25], ["University of California, San Francisco School of Medicine", 12.8, 14], ["Boston University Chobanian & Avedisian School of Medicine", 12.5, 7], ["Mayo Clinic - Rochester", 11.5, 14], ["University of Vermont Larner College of Medicine", 11.0, 3], ["University of Utah School of Medicine", 10.9, 9], ["Columbia University Vagelos College of Physicians and Surgeons", 10.8, 16], ["University of California San Diego School of Medicine", 10.8, 9], ["The Warren Alpert Medical School of Brown University", 10.6, 12], ["Fox Chase Cancer Center", 10.3, 4], ["Geisel School of Medicine at Dartmouth", 10.0, 6], ["University of Michigan Medical School", 10.0, 13], ["Penn State College of Medicine", 10.0, 8], ["University of California, Irvine School of Medicine", 9.8, 6]], "median_h": [["Beth Israel Deaconess Medical Center, Harvard Medical School", 23.0, 3], ["Stanford University School of Medicine", 14.5, 11], ["University of Wisconsin School of Medicine and Public Health", 14.0, 12], ["University of California, San Francisco School of Medicine", 13.0, 14], ["Mayo Clinic - Rochester", 13.0, 14], ["Mayo Clinic - Phoenix", 13.0, 7], ["Massachusetts General Hospital, Harvard Medical School", 11.0, 25], ["University of California San Diego School of Medicine", 11.0, 9], ["University of Washington School of Medicine", 10.5, 12], ["The University of Texas MD Anderson Cancer Center", 10.0, 32], ["Duke University School of Medicine", 10.0, 15], ["Weill Cornell Medicine", 9.0, 27], ["University of Michigan Medical School", 9.0, 13], ["Joe R. and Teresa Lozano Long School of Medicine at UT Health San Antonio", 9.0, 5], ["University of South Florida Morsani College of Medicine", 8.0, 13], ["University of Pittsburgh School of Medicine", 8.0, 17], ["University of Vermont Larner College of Medicine", 8.0, 3], ["Medical University of South Carolina", 7.5, 10], ["Fox Chase Cancer Center", 7.0, 4], ["McGovern Medical School at The University of Texas Health Science Center at Houston", 7.0, 8], ["Memorial Sloan Kettering Cancer Center", 7.0, 35], ["University of Texas Southwestern Medical Center", 7.0, 17], ["The George Washington University School of Medicine and Health Sciences", 7.0, 7], ["Penn State College of Medicine", 7.0, 8], ["Mayo Clinic - Jacksonville", 7.0, 6]]}}, "Nuclear Medicine": {"total_institutions": 108, "rankings": {"papers": [["Perelman School of Medicine at the University of Pennsylvania", 2476.0, 13], ["David Geffen School of Medicine at University of California, Los Angeles", 2042.0, 17], ["University of Washington School of Medicine", 2010.0, 15], ["Brigham and Women's Hospital, Harvard Medical School", 2000.0, 12], ["University of Texas Southwestern Medical Center", 1973.0, 18], ["University of California, San Francisco School of Medicine", 1963.0, 14], ["Johns Hopkins University School of Medicine", 1571.0, 9], ["Washington University School of Medicine in St. Louis", 1522.0, 13], ["The University of Texas MD Anderson Cancer Center", 1228.0, 15], ["University of Michigan Medical School", 1182.0, 12], ["University of Wisconsin School of Medicine and Public Health", 1106.0, 8], ["Mayo Clinic - Rochester", 999.0, 6], ["Massachusetts General Hospital, Harvard Medical School", 984.0, 15], ["Emory University School of Medicine", 984.0, 13], ["University of Utah School of Medicine", 943.0, 5], ["University of Iowa Carver College of Medicine", 872.0, 10], ["Keck School of Medicine of the University of Southern California", 853.0, 4], ["Stanford University School of Medicine", 810.0, 11], ["University of Alabama at Birmingham Heersink School of Medicine", 810.0, 10], ["University of Illinois College of Medicine", 782.0, 2], ["Memorial Sloan Kettering Cancer Center", 721.0, 7], ["Albert Einstein College of Medicine", 657.0, 5], ["Yale School of Medicine", 613.0, 3], ["University of California, Davis School of Medicine", 603.0, 10], ["Duke University School of Medicine", 602.0, 7]], "citations": [["Brigham and Women's Hospital, Harvard Medical School", 156449.0, 12], ["David Geffen School of Medicine at University of California, Los Angeles", 109618.0, 17], ["Johns Hopkins University School of Medicine", 105733.0, 9], ["Perelman School of Medicine at the University of Pennsylvania", 105660.0, 13], ["University of Washington School of Medicine", 102591.0, 15], ["University of California, San Francisco School of Medicine", 99206.0, 14], ["Washington University School of Medicine in St. Louis", 88065.0, 13], ["University of Texas Southwestern Medical Center", 82787.0, 18], ["University of Utah School of Medicine", 67367.0, 5], ["University of Michigan Medical School", 57509.0, 12], ["The University of Texas MD Anderson Cancer Center", 56562.0, 15], ["Mayo Clinic - Rochester", 51654.0, 6], ["University of Wisconsin School of Medicine and Public Health", 49836.0, 8], ["Memorial Sloan Kettering Cancer Center", 41620.0, 7], ["Yale School of Medicine", 39617.0, 3], ["Massachusetts General Hospital, Harvard Medical School", 38056.0, 15], ["University of Illinois College of Medicine", 37392.0, 2], ["Institute for Neurodegenerative Disorders", 33458.0, 1], ["University of Iowa Carver College of Medicine", 33301.0, 10], ["Duke University School of Medicine", 32242.0, 7], ["Keck School of Medicine of the University of Southern California", 31678.0, 4], ["Emory University School of Medicine", 29233.0, 13], ["University of Maryland School of Medicine", 27538.0, 4], ["Stanford University School of Medicine", 23377.0, 11], ["University of Alabama at Birmingham Heersink School of Medicine", 19354.0, 10]], "papers_per_faculty": [["Keck School of Medicine of the University of Southern California", 213.2, 4], ["Yale School of Medicine", 204.3, 3], ["Perelman School of Medicine at the University of Pennsylvania", 190.5, 13], ["University of Utah School of Medicine", 188.6, 5], ["Johns Hopkins University School of Medicine", 174.6, 9], ["Brigham and Women's Hospital, Harvard Medical School", 166.7, 12], ["Mayo Clinic - Rochester", 166.5, 6], ["University of California, San Francisco School of Medicine", 140.2, 14], ["University of Wisconsin School of Medicine and Public Health", 138.2, 8], ["University of Washington School of Medicine", 134.0, 15], ["Albert Einstein College of Medicine", 131.4, 5], ["University of Maryland School of Medicine", 128.8, 4], ["David Geffen School of Medicine at University of California, Los Angeles", 120.1, 17], ["Washington University School of Medicine in St. Louis", 117.1, 13], ["University of Texas Southwestern Medical Center", 109.6, 18], ["Memorial Sloan Kettering Cancer Center", 103.0, 7], ["University of Michigan Medical School", 98.5, 12], ["University of Iowa Carver College of Medicine", 87.2, 10], ["Duke University School of Medicine", 86.0, 7], ["Henry Ford Health", 83.7, 3], ["The University of Texas MD Anderson Cancer Center", 81.9, 15], ["Virginia Commonwealth University School of Medicine", 81.7, 3], ["University of Alabama at Birmingham Heersink School of Medicine", 81.0, 10], ["Emory University School of Medicine", 75.7, 13], ["Stanford University School of Medicine", 73.6, 11]], "mean_h": [["University of Utah School of Medicine", 46.4, 5], ["Keck School of Medicine of the University of Southern California", 41.8, 4], ["Brigham and Women's Hospital, Harvard Medical School", 38.6, 12], ["Mayo Clinic - Rochester", 36.3, 6], ["Johns Hopkins University School of Medicine", 36.0, 9], ["David Geffen School of Medicine at University of California, Los Angeles", 35.7, 17], ["University of California, San Francisco School of Medicine", 35.0, 14], ["Yale School of Medicine", 34.0, 3], ["Perelman School of Medicine at the University of Pennsylvania", 33.9, 13], ["Memorial Sloan Kettering Cancer Center", 31.9, 7], ["University of Maryland School of Medicine", 31.8, 4], ["Henry Ford Health", 31.0, 3], ["Washington University School of Medicine in St. Louis", 29.9, 13], ["University of Michigan Medical School", 27.1, 12], ["University of Iowa Carver College of Medicine", 25.8, 10], ["University of Wisconsin School of Medicine and Public Health", 25.2, 8], ["Duke University School of Medicine", 25.1, 7], ["University of Washington School of Medicine", 24.5, 15], ["University of Texas Southwestern Medical Center", 24.3, 18], ["The University of Texas MD Anderson Cancer Center", 24.0, 15], ["University of California San Diego School of Medicine", 24.0, 3], ["University of New Mexico School of Medicine", 22.5, 4], ["Virginia Commonwealth University School of Medicine", 22.0, 3], ["Geisel School of Medicine at Dartmouth", 21.0, 3], ["Albert Einstein College of Medicine", 20.8, 5]], "median_h": [["University of Utah School of Medicine", 61.0, 5], ["Keck School of Medicine of the University of Southern California", 48.0, 4], ["Brigham and Women's Hospital, Harvard Medical School", 38.0, 12], ["Johns Hopkins University School of Medicine", 36.0, 9], ["David Geffen School of Medicine at University of California, Los Angeles", 35.0, 17], ["Henry Ford Health", 34.0, 3], ["University of California, San Francisco School of Medicine", 31.5, 14], ["Mayo Clinic - Rochester", 30.0, 6], ["University of Maryland School of Medicine", 29.5, 4], ["Memorial Sloan Kettering Cancer Center", 26.0, 7], ["Virginia Commonwealth University School of Medicine", 26.0, 3], ["Albert Einstein College of Medicine", 26.0, 5], ["University of Michigan Medical School", 25.5, 12], ["University of Iowa Carver College of Medicine", 25.0, 10], ["Duke University School of Medicine", 23.0, 7], ["Perelman School of Medicine at the University of Pennsylvania", 22.0, 13], ["Geisel School of Medicine at Dartmouth", 22.0, 3], ["Stanford University School of Medicine", 21.0, 11], ["The University of Texas MD Anderson Cancer Center", 20.0, 15], ["University of Kentucky College of Medicine", 17.0, 3], ["Loma Linda University School of Medicine", 17.0, 3], ["Emory University School of Medicine", 16.0, 13], ["Washington University School of Medicine in St. Louis", 15.0, 13], ["University of Texas Southwestern Medical Center", 14.5, 18], ["University of Wisconsin School of Medicine and Public Health", 14.5, 8]]}}, "Pediatric Radiology": {"total_institutions": 97, "rankings": {"papers": [["Massachusetts General Hospital, Harvard Medical School", 4219.0, 45], ["Perelman School of Medicine at the University of Pennsylvania", 4167.0, 55], ["Stanford University School of Medicine", 2487.0, 28], ["Northwestern University Feinberg School of Medicine", 2218.0, 33], ["Baylor College of Medicine", 2198.0, 55], ["University of Cincinnati", 1517.0, 19], ["Emory University School of Medicine", 1391.0, 38], ["University of Washington", 1326.0, 33], ["Washington University School of Medicine in St. Louis", 1313.0, 9], ["George Washington University", 1308.0, 23], ["Wake Forest University", 1145.0, 17], ["University of Arizona", 1056.0, 25], ["University of Rochester", 1029.0, 17], ["Ohio State University", 940.0, 31], ["Indiana University", 820.0, 8], ["UCF College of Medicine", 815.0, 7], ["University of Pittsburgh", 801.0, 23], ["University of Texas Southwestern Medical Center", 615.0, 27], ["University of Michigan Medical School", 571.0, 8], ["Vanderbilt University School of Medicine", 562.0, 18], ["Mayo Clinic - Rochester", 556.0, 11], ["University of Arkansas for Medical Sciences", 502.0, 22], ["University of Tennessee", 499.0, 31], ["Northeast Ohio Medical University", 488.0, 12], ["USC Keck School of Medicine", 468.0, 9]], "citations": [["Massachusetts General Hospital, Harvard Medical School", 155435.0, 45], ["Perelman School of Medicine at the University of Pennsylvania", 99917.0, 55], ["Stanford University School of Medicine", 91236.0, 28], ["Northwestern University Feinberg School of Medicine", 81568.0, 33], ["Washington University School of Medicine in St. Louis", 64682.0, 9], ["Baylor College of Medicine", 61401.0, 55], ["Wake Forest University", 51322.0, 17], ["University of Arizona", 47279.0, 25], ["George Washington University", 46450.0, 23], ["University of Cincinnati", 45198.0, 19], ["University of Rochester", 40012.0, 17], ["UCF College of Medicine", 34320.0, 7], ["University of South Florida Morsani College of Medicine", 33664.0, 7], ["University of Pittsburgh", 31752.0, 23], ["Ohio State University", 31266.0, 31], ["Emory University School of Medicine", 30889.0, 38], ["University of Washington", 30485.0, 33], ["Northeast Ohio Medical University", 19874.0, 12], ["University of Michigan Medical School", 19408.0, 8], ["University of Texas Southwestern Medical Center", 17555.0, 27], ["Wayne State University", 17106.0, 5], ["University of Tennessee", 16559.0, 31], ["UC Irvine", 14122.0, 10], ["Duke University School of Medicine", 13918.0, 7], ["Mayo Clinic - Rochester", 13749.0, 11]], "papers_per_faculty": [["Washington University School of Medicine in St. Louis", 145.9, 9], ["UCF College of Medicine", 116.4, 7], ["Icahn School of Medicine at Mount Sinai", 105.5, 4], ["Indiana University", 102.5, 8], ["Massachusetts General Hospital, Harvard Medical School", 93.8, 45], ["Stanford University School of Medicine", 88.8, 28], ["Albert Einstein College of Medicine", 80.5, 4], ["University of Cincinnati", 79.8, 19], ["Perelman School of Medicine at the University of Pennsylvania", 75.8, 55], ["University of Michigan Medical School", 71.4, 8], ["Wayne State University", 70.4, 5], ["Cedars-Sinai", 69.7, 3], ["Thomas Jefferson University", 67.7, 3], ["Wake Forest University", 67.4, 17], ["Northwestern University Feinberg School of Medicine", 67.2, 33], ["University of North Carolina School of Medicine", 66.1, 7], ["Duke University School of Medicine", 60.9, 7], ["University of Rochester", 60.5, 17], ["George Washington University", 56.9, 23], ["University of South Florida Morsani College of Medicine", 56.1, 7], ["Case Western Reserve University", 52.1, 8], ["USC Keck School of Medicine", 52.0, 9], ["Mayo Clinic - Rochester", 50.5, 11], ["University of New Mexico School of Medicine", 48.3, 3], ["Stony Brook University", 46.3, 6]], "mean_h": [["Washington University School of Medicine in St. Louis", 31.9, 9], ["UCF College of Medicine", 26.7, 7], ["Albert Einstein College of Medicine", 24.8, 4], ["Massachusetts General Hospital, Harvard Medical School", 24.3, 45], ["University of Cincinnati", 23.5, 19], ["Stanford University School of Medicine", 23.2, 28], ["Wake Forest University", 20.8, 17], ["Icahn School of Medicine at Mount Sinai", 20.5, 4], ["Wayne State University", 20.2, 5], ["University of New Mexico School of Medicine", 20.0, 3], ["Cedars-Sinai", 19.7, 3], ["University of South Florida Morsani College of Medicine", 18.1, 7], ["Perelman School of Medicine at the University of Pennsylvania", 18.1, 55], ["Thomas Jefferson University", 18.0, 3], ["University of Michigan Medical School", 17.8, 8], ["George Washington University", 17.4, 23], ["University of Rochester", 17.4, 17], ["Mayo Clinic - Rochester", 16.9, 11], ["Northwestern University Feinberg School of Medicine", 16.0, 33], ["Indiana University", 15.9, 8], ["Duke University School of Medicine", 15.7, 7], ["University of North Carolina School of Medicine", 15.4, 7], ["USC Keck School of Medicine", 14.3, 9], ["Northeast Ohio Medical University", 14.2, 12], ["UT Health Houston McGovern Medical School", 13.9, 7]], "median_h": [["Washington University School of Medicine in St. Louis", 27.0, 9], ["Cedars-Sinai", 23.0, 3], ["University of Cincinnati", 22.0, 19], ["Albert Einstein College of Medicine", 21.5, 4], ["Stanford University School of Medicine", 20.5, 28], ["Massachusetts General Hospital, Harvard Medical School", 20.0, 45], ["Mayo Clinic - Rochester", 17.0, 11], ["Perelman School of Medicine at the University of Pennsylvania", 16.0, 55], ["UCF College of Medicine", 16.0, 7], ["Wake Forest University", 14.0, 17], ["University of Rochester", 14.0, 17], ["University of New Mexico School of Medicine", 14.0, 3], ["Icahn School of Medicine at Mount Sinai", 13.5, 4], ["University of Washington", 13.0, 33], ["Indiana University", 12.5, 8], ["Baylor College of Medicine", 12.0, 55], ["University of North Carolina School of Medicine", 12.0, 7], ["Columbia University Vagelos College of Physicians and Surgeons", 12.0, 7], ["Northeast Ohio Medical University", 11.0, 12], ["George Washington University", 11.0, 23], ["University of Wisconsin", 11.0, 7], ["NYU Grossman School of Medicine", 11.0, 7], ["University of Michigan Medical School", 10.5, 8], ["Johns Hopkins University School of Medicine", 10.0, 6], ["Duke University School of Medicine", 10.0, 7]]}}, "Interventional Radiology": {"total_institutions": 102, "rankings": {"papers": [["Massachusetts General Hospital, Harvard Medical School", 2765.0, 19], ["The University of Texas MD Anderson Cancer Center", 1921.0, 31], ["Perelman School of Medicine at the University of Pennsylvania", 1738.0, 18], ["University of Virginia School of Medicine", 1344.0, 11], ["Emory University School of Medicine", 1285.0, 24], ["Brigham and Women's Hospital, Harvard Medical School", 1076.0, 11], ["David Geffen School of Medicine at University of California, Los Angeles", 1026.0, 18], ["Northwestern University Feinberg School of Medicine", 1023.0, 10], ["Yale School of Medicine", 986.0, 18], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 930.0, 12], ["University of Chicago Pritzker School of Medicine", 923.0, 7], ["Stanford University School of Medicine", 891.0, 14], ["University of Texas Southwestern Medical Center", 792.0, 15], ["Weill Cornell Medicine", 733.0, 21], ["Johns Hopkins University School of Medicine", 716.0, 11], ["Washington University School of Medicine in St. Louis", 688.0, 19], ["Duke University School of Medicine", 680.0, 16], ["Mayo Clinic - Rochester", 679.0, 13], ["University of Wisconsin School of Medicine and Public Health", 622.0, 15], ["University of Arizona College of Medicine", 573.0, 8], ["Vanderbilt University School of Medicine", 542.0, 13], ["University of Washington School of Medicine", 532.0, 15], ["Oregon Health & Science University School of Medicine", 526.0, 8], ["University of North Carolina at Chapel Hill School of Medicine", 524.0, 13], ["Icahn School of Medicine at Mount Sinai", 500.0, 15]], "citations": [["Massachusetts General Hospital, Harvard Medical School", 209525.0, 19], ["University of Virginia School of Medicine", 79663.0, 11], ["The University of Texas MD Anderson Cancer Center", 72012.0, 31], ["Perelman School of Medicine at the University of Pennsylvania", 60856.0, 18], ["Emory University School of Medicine", 58402.0, 24], ["Brigham and Women's Hospital, Harvard Medical School", 48684.0, 11], ["Northwestern University Feinberg School of Medicine", 43358.0, 10], ["David Geffen School of Medicine at University of California, Los Angeles", 35310.0, 18], ["Vanderbilt University School of Medicine", 34821.0, 13], ["Stanford University School of Medicine", 31511.0, 14], ["University of Arizona College of Medicine", 30367.0, 8], ["Yale School of Medicine", 29802.0, 18], ["Wake Forest University School of Medicine", 29405.0, 7], ["Mayo Clinic - Rochester", 25539.0, 13], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 24541.0, 12], ["Weill Cornell Medicine", 24307.0, 21], ["Washington University School of Medicine in St. Louis", 23474.0, 19], ["University of Texas Southwestern Medical Center", 23281.0, 15], ["University of Michigan Medical School", 19965.0, 9], ["Johns Hopkins University School of Medicine", 19692.0, 11], ["Mayo Clinic - Phoenix", 17863.0, 7], ["University of Chicago Pritzker School of Medicine", 16671.0, 7], ["University of Washington School of Medicine", 16283.0, 15], ["Oregon Health & Science University School of Medicine", 15865.0, 8], ["University of Colorado School of Medicine", 15860.0, 12]], "papers_per_faculty": [["Massachusetts General Hospital, Harvard Medical School", 145.5, 19], ["University of Chicago Pritzker School of Medicine", 131.9, 7], ["University of Virginia School of Medicine", 122.2, 11], ["Northwestern University Feinberg School of Medicine", 102.3, 10], ["Brigham and Women's Hospital, Harvard Medical School", 97.8, 11], ["Perelman School of Medicine at the University of Pennsylvania", 96.6, 18], ["Keck School of Medicine of the University of Southern California", 92.4, 5], ["Albert Einstein College of Medicine", 89.0, 3], ["The George Washington University School of Medicine and Health Sciences", 88.0, 5], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 77.5, 12], ["University of Arizona College of Medicine", 71.6, 8], ["Oregon Health & Science University School of Medicine", 65.8, 8], ["Johns Hopkins University School of Medicine", 65.1, 11], ["Stanford University School of Medicine", 63.6, 14], ["Mayo Clinic - Phoenix", 62.1, 7], ["The University of Texas MD Anderson Cancer Center", 62.0, 31], ["University of Maryland School of Medicine", 61.8, 4], ["University of Mississippi Medical Center School of Medicine", 60.9, 7], ["David Geffen School of Medicine at University of California, Los Angeles", 57.0, 18], ["Yale School of Medicine", 54.8, 18], ["Emory University School of Medicine", 53.5, 24], ["University of Texas Southwestern Medical Center", 52.8, 15], ["Mayo Clinic - Rochester", 52.2, 13], ["Wake Forest University School of Medicine", 45.7, 7], ["University of Utah School of Medicine", 45.3, 6]], "mean_h": [["Massachusetts General Hospital, Harvard Medical School", 27.6, 19], ["Perelman School of Medicine at the University of Pennsylvania", 25.8, 18], ["University of Virginia School of Medicine", 25.4, 11], ["Albert Einstein College of Medicine", 25.3, 3], ["Brigham and Women's Hospital, Harvard Medical School", 25.2, 11], ["University of Chicago Pritzker School of Medicine", 24.0, 7], ["Northwestern University Feinberg School of Medicine", 23.7, 10], ["Stanford University School of Medicine", 19.8, 14], ["The George Washington University School of Medicine and Health Sciences", 19.4, 5], ["Mayo Clinic - Phoenix", 18.6, 7], ["The University of Texas MD Anderson Cancer Center", 18.5, 31], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 18.1, 12], ["University of Maryland School of Medicine", 17.5, 4], ["Oregon Health & Science University School of Medicine", 16.9, 8], ["University of Arizona College of Medicine", 16.4, 8], ["Johns Hopkins University School of Medicine", 16.3, 11], ["David Geffen School of Medicine at University of California, Los Angeles", 15.7, 18], ["Mayo Clinic - Rochester", 15.4, 13], ["University of Florida College of Medicine", 15.2, 4], ["University of Texas Southwestern Medical Center", 15.1, 15], ["Yale School of Medicine", 15.1, 18], ["Vanderbilt University School of Medicine", 14.3, 13], ["Keck School of Medicine of the University of Southern California", 13.8, 5], ["Emory University School of Medicine", 13.5, 24], ["Wake Forest University School of Medicine", 13.1, 7]], "median_h": [["Albert Einstein College of Medicine", 26.0, 3], ["University of Chicago Pritzker School of Medicine", 24.0, 7], ["Perelman School of Medicine at the University of Pennsylvania", 23.0, 18], ["Brigham and Women's Hospital, Harvard Medical School", 20.0, 11], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 17.5, 12], ["Northwestern University Feinberg School of Medicine", 16.0, 10], ["Stanford University School of Medicine", 16.0, 14], ["Massachusetts General Hospital, Harvard Medical School", 13.0, 19], ["The George Washington University School of Medicine and Health Sciences", 13.0, 5], ["University of California, Davis School of Medicine", 12.0, 4], ["University of Maryland School of Medicine", 12.0, 4], ["The University of Texas MD Anderson Cancer Center", 12.0, 31], ["Oregon Health & Science University School of Medicine", 11.5, 8], ["Yale School of Medicine", 11.5, 18], ["Johns Hopkins University School of Medicine", 11.0, 11], ["Mayo Clinic - Rochester", 11.0, 13], ["Medical College of Wisconsin", 11.0, 10], ["Keck School of Medicine of the University of Southern California", 11.0, 5], ["University of Florida College of Medicine", 10.5, 4], ["Geisel School of Medicine at Dartmouth", 10.0, 7], ["David Geffen School of Medicine at University of California, Los Angeles", 10.0, 18], ["University of Texas Southwestern Medical Center", 9.5, 15], ["The Warren Alpert Medical School of Brown University", 9.0, 10], ["University of North Carolina at Chapel Hill School of Medicine", 9.0, 13], ["Duke University School of Medicine", 8.0, 16]]}}, "Abdominal Imaging": {"total_institutions": 103, "rankings": {"papers": [["Mayo Clinic - Rochester", 6562.0, 95], ["The University of Texas MD Anderson Cancer Center", 4160.0, 66], ["Brigham and Women's Hospital, Harvard Medical School", 3324.0, 35], ["Johns Hopkins University School of Medicine", 3111.0, 19], ["Massachusetts General Hospital, Harvard Medical School", 2481.0, 19], ["NYU Grossman School of Medicine", 2325.0, 76], ["Memorial Sloan Kettering Cancer Center", 2125.0, 74], ["University of Washington School of Medicine", 2048.0, 26], ["University of Wisconsin School of Medicine and Public Health", 1748.0, 19], ["Weill Cornell Medicine", 1652.0, 33], ["University of Michigan Medical School", 1333.0, 32], ["Duke University School of Medicine", 1309.0, 16], ["Perelman School of Medicine at the University of Pennsylvania", 1277.0, 30], ["University of Texas Southwestern Medical Center", 1161.0, 27], ["Washington University School of Medicine in St. Louis", 1140.0, 20], ["University of Vermont Larner College of Medicine", 1129.0, 38], ["Northwestern University Feinberg School of Medicine", 1055.0, 18], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 1038.0, 22], ["Medical College of Wisconsin", 986.0, 30], ["University of California, San Francisco School of Medicine", 931.0, 21], ["Mayo Clinic - Phoenix", 926.0, 9], ["University of Alabama at Birmingham Heersink School of Medicine", 871.0, 14], ["Case Western Reserve University School of Medicine", 831.0, 6], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 812.0, 14], ["University of Rochester School of Medicine and Dentistry", 778.0, 15]], "citations": [["Mayo Clinic - Rochester", 202350.0, 95], ["Brigham and Women's Hospital, Harvard Medical School", 162695.0, 35], ["The University of Texas MD Anderson Cancer Center", 142263.0, 66], ["Johns Hopkins University School of Medicine", 141533.0, 19], ["NYU Grossman School of Medicine", 95664.0, 76], ["Massachusetts General Hospital, Harvard Medical School", 94378.0, 19], ["Memorial Sloan Kettering Cancer Center", 93939.0, 74], ["University of Washington School of Medicine", 86089.0, 26], ["Perelman School of Medicine at the University of Pennsylvania", 73562.0, 30], ["University of Wisconsin School of Medicine and Public Health", 67863.0, 19], ["Weill Cornell Medicine", 59938.0, 33], ["University of Tennessee Health Science Center College of Medicine", 49850.0, 13], ["Duke University School of Medicine", 48280.0, 16], ["University of Alabama at Birmingham Heersink School of Medicine", 42557.0, 14], ["University of Michigan Medical School", 42134.0, 32], ["University of Texas Southwestern Medical Center", 33832.0, 27], ["Northwestern University Feinberg School of Medicine", 33580.0, 18], ["University of South Florida Morsani College of Medicine", 32456.0, 6], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 31418.0, 22], ["Medical College of Wisconsin", 29954.0, 30], ["Case Western Reserve University School of Medicine", 29791.0, 6], ["Mayo Clinic - Phoenix", 27670.0, 9], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 27137.0, 14], ["University of California, San Francisco School of Medicine", 27132.0, 21], ["Washington University School of Medicine in St. Louis", 24937.0, 20]], "papers_per_faculty": [["Johns Hopkins University School of Medicine", 163.7, 19], ["Case Western Reserve University School of Medicine", 138.5, 6], ["Massachusetts General Hospital, Harvard Medical School", 130.6, 19], ["Mayo Clinic - Phoenix", 102.9, 9], ["Brigham and Women's Hospital, Harvard Medical School", 95.0, 35], ["University of Wisconsin School of Medicine and Public Health", 92.0, 19], ["The George Washington University School of Medicine and Health Sciences", 91.7, 3], ["Duke University School of Medicine", 81.8, 16], ["University of Washington School of Medicine", 78.8, 26], ["University of Chicago Pritzker School of Medicine", 71.9, 7], ["Mayo Clinic - Rochester", 69.1, 95], ["University of California, Davis School of Medicine", 65.6, 10], ["University of South Florida Morsani College of Medicine", 65.0, 6], ["The University of Texas MD Anderson Cancer Center", 63.0, 66], ["University of Alabama at Birmingham Heersink School of Medicine", 62.2, 14], ["University of Illinois College of Medicine", 60.2, 4], ["Northwestern University Feinberg School of Medicine", 58.6, 18], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 58.0, 14], ["Washington University School of Medicine in St. Louis", 57.0, 20], ["University of Maryland School of Medicine", 52.5, 4], ["University of Rochester School of Medicine and Dentistry", 51.9, 15], ["Weill Cornell Medicine", 50.1, 33], ["Boston University Chobanian & Avedisian School of Medicine", 49.2, 9], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 47.2, 22], ["University of Minnesota Medical School", 46.8, 6]], "mean_h": [["Case Western Reserve University School of Medicine", 30.2, 6], ["Massachusetts General Hospital, Harvard Medical School", 29.7, 19], ["Johns Hopkins University School of Medicine", 28.3, 19], ["The George Washington University School of Medicine and Health Sciences", 26.7, 3], ["Brigham and Women's Hospital, Harvard Medical School", 25.4, 35], ["Mayo Clinic - Phoenix", 23.4, 9], ["Duke University School of Medicine", 22.2, 16], ["University of Washington School of Medicine", 20.7, 26], ["University of Wisconsin School of Medicine and Public Health", 20.2, 19], ["Loma Linda University School of Medicine", 19.0, 3], ["Mayo Clinic - Rochester", 18.6, 95], ["The University of Texas MD Anderson Cancer Center", 18.5, 66], ["University of Chicago Pritzker School of Medicine", 17.1, 7], ["Northwestern University Feinberg School of Medicine", 16.6, 18], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 16.3, 14], ["University of Alabama at Birmingham Heersink School of Medicine", 16.2, 14], ["University of South Florida Morsani College of Medicine", 15.8, 6], ["University of Maryland School of Medicine", 15.5, 4], ["Boston University Chobanian & Avedisian School of Medicine", 15.3, 9], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 15.0, 22], ["University of Minnesota Medical School", 14.7, 6], ["University of Tennessee Health Science Center College of Medicine", 14.7, 13], ["University of California, Davis School of Medicine", 14.3, 10], ["University of California, San Francisco School of Medicine", 14.0, 21], ["Perelman School of Medicine at the University of Pennsylvania", 13.9, 30]], "median_h": [["Massachusetts General Hospital, Harvard Medical School", 32.0, 19], ["Case Western Reserve University School of Medicine", 29.0, 6], ["Johns Hopkins University School of Medicine", 22.5, 19], ["Brigham and Women's Hospital, Harvard Medical School", 20.5, 35], ["The George Washington University School of Medicine and Health Sciences", 20.0, 3], ["The University of Texas MD Anderson Cancer Center", 17.5, 66], ["Duke University School of Medicine", 16.0, 16], ["University of California San Diego School of Medicine", 15.0, 13], ["Mayo Clinic - Rochester", 15.0, 95], ["Mayo Clinic - Phoenix", 15.0, 9], ["University of California, San Francisco School of Medicine", 14.0, 21], ["Loma Linda University School of Medicine", 13.0, 3], ["University of Washington School of Medicine", 12.5, 26], ["University of Michigan Medical School", 12.0, 32], ["University of Wisconsin School of Medicine and Public Health", 12.0, 19], ["Mayo Clinic - Jacksonville", 12.0, 13], ["Boston University Chobanian & Avedisian School of Medicine", 12.0, 9], ["Loyola University Chicago Stritch School of Medicine", 11.5, 8], ["SUNY Upstate Medical University", 11.0, 3], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 11.0, 22], ["Joe R. and Teresa Lozano Long School of Medicine at UT Health San Antonio", 11.0, 7], ["Washington University School of Medicine in St. Louis", 10.5, 20], ["Wake Forest University School of Medicine", 10.5, 4], ["Northwestern University Feinberg School of Medicine", 10.5, 18], ["Beth Israel Deaconess Medical Center, Harvard Medical School", 10.0, 14]]}}, "Cardiothoracic Imaging": {"total_institutions": 86, "rankings": {"papers": [["University of Wisconsin School of Medicine and Public Health", 2316.0, 15], ["Cedars-Sinai Medical Center", 2004.0, 4], ["Washington University School of Medicine in St. Louis", 1885.0, 18], ["Perelman School of Medicine at the University of Pennsylvania", 1865.0, 22], ["Massachusetts General Hospital, Harvard Medical School", 1854.0, 16], ["The University of Texas MD Anderson Cancer Center", 1807.0, 17], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 1510.0, 8], ["University of Iowa Carver College of Medicine", 1202.0, 5], ["Stanford University School of Medicine", 1107.0, 14], ["Emory University School of Medicine", 919.0, 11], ["Brigham and Women's Hospital, Harvard Medical School", 890.0, 18], ["University of Virginia School of Medicine", 882.0, 9], ["Medical University of South Carolina", 878.0, 10], ["Columbia University Vagelos College of Physicians and Surgeons", 855.0, 12], ["NYU Grossman School of Medicine", 807.0, 22], ["Mayo Clinic - Rochester", 767.0, 9], ["University of Michigan Medical School", 733.0, 10], ["University of Alabama at Birmingham Heersink School of Medicine", 724.0, 9], ["Duke University School of Medicine", 707.0, 14], ["Johns Hopkins University School of Medicine", 687.0, 6], ["David Geffen School of Medicine at University of California, Los Angeles", 667.0, 17], ["University of Washington School of Medicine", 626.0, 10], ["University of Florida College of Medicine", 611.0, 6], ["Vanderbilt University School of Medicine", 573.0, 9], ["Mayo Clinic - Phoenix", 496.0, 7]], "citations": [["Cedars-Sinai Medical Center", 153469.0, 4], ["University of Wisconsin School of Medicine and Public Health", 131679.0, 15], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 84331.0, 8], ["Massachusetts General Hospital, Harvard Medical School", 83470.0, 16], ["The University of Texas MD Anderson Cancer Center", 75270.0, 17], ["Washington University School of Medicine in St. Louis", 69064.0, 18], ["Perelman School of Medicine at the University of Pennsylvania", 61395.0, 22], ["University of Iowa Carver College of Medicine", 55789.0, 5], ["Stanford University School of Medicine", 55619.0, 14], ["University of Michigan Medical School", 46617.0, 10], ["University of Virginia School of Medicine", 45774.0, 9], ["Brigham and Women's Hospital, Harvard Medical School", 36977.0, 18], ["Vanderbilt University School of Medicine", 34894.0, 9], ["Emory University School of Medicine", 34886.0, 11], ["David Geffen School of Medicine at University of California, Los Angeles", 33716.0, 17], ["Duke University School of Medicine", 31995.0, 14], ["Medical University of South Carolina", 31760.0, 10], ["University of Arizona College of Medicine", 30517.0, 5], ["Columbia University Vagelos College of Physicians and Surgeons", 30215.0, 12], ["University of Washington School of Medicine", 26343.0, 10], ["Memorial Sloan Kettering Cancer Center", 25354.0, 3], ["NYU Grossman School of Medicine", 24644.0, 22], ["Icahn School of Medicine at Mount Sinai", 23299.0, 6], ["University of California San Diego School of Medicine", 22387.0, 9], ["Mayo Clinic - Rochester", 19391.0, 9]], "papers_per_faculty": [["Cedars-Sinai Medical Center", 501.0, 4], ["University of Iowa Carver College of Medicine", 240.4, 5], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 188.8, 8], ["University of Maryland School of Medicine", 162.7, 3], ["University of Wisconsin School of Medicine and Public Health", 154.4, 15], ["Case Western Reserve University School of Medicine", 122.7, 3], ["Massachusetts General Hospital, Harvard Medical School", 115.9, 16], ["Johns Hopkins University School of Medicine", 114.5, 6], ["The University of Texas MD Anderson Cancer Center", 106.3, 17], ["Washington University School of Medicine in St. Louis", 104.7, 18], ["University of Florida College of Medicine", 101.8, 6], ["University of Virginia School of Medicine", 98.0, 9], ["Memorial Sloan Kettering Cancer Center", 96.0, 3], ["Medical University of South Carolina", 87.8, 10], ["Mayo Clinic - Rochester", 85.2, 9], ["Perelman School of Medicine at the University of Pennsylvania", 84.8, 22], ["Emory University School of Medicine", 83.5, 11], ["University of Arizona College of Medicine", 80.8, 5], ["University of Alabama at Birmingham Heersink School of Medicine", 80.4, 9], ["Stanford University School of Medicine", 79.1, 14], ["University of Michigan Medical School", 73.3, 10], ["Columbia University Vagelos College of Physicians and Surgeons", 71.2, 12], ["Mayo Clinic - Phoenix", 70.9, 7], ["Yale School of Medicine", 70.4, 5], ["University of Chicago Pritzker School of Medicine", 70.0, 4]], "mean_h": [["Cedars-Sinai Medical Center", 88.5, 4], ["University of Iowa Carver College of Medicine", 39.4, 5], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 39.2, 8], ["Memorial Sloan Kettering Cancer Center", 37.3, 3], ["University of Maryland School of Medicine", 32.3, 3], ["University of Wisconsin School of Medicine and Public Health", 31.1, 15], ["The University of Texas MD Anderson Cancer Center", 26.7, 17], ["Massachusetts General Hospital, Harvard Medical School", 26.0, 16], ["University of Arizona College of Medicine", 25.2, 5], ["Case Western Reserve University School of Medicine", 23.0, 3], ["Washington University School of Medicine in St. Louis", 22.8, 18], ["University of Virginia School of Medicine", 22.3, 9], ["Medical University of South Carolina", 21.9, 10], ["Emory University School of Medicine", 21.4, 11], ["Stanford University School of Medicine", 21.0, 14], ["Mayo Clinic - Rochester", 20.0, 9], ["University of Washington School of Medicine", 19.3, 10], ["Johns Hopkins University School of Medicine", 19.0, 6], ["Joe R. and Teresa Lozano Long School of Medicine at UT Health San Antonio", 18.8, 4], ["Icahn School of Medicine at Mount Sinai", 18.2, 6], ["University of Michigan Medical School", 18.0, 10], ["Yale School of Medicine", 17.8, 5], ["Duke University School of Medicine", 17.7, 14], ["Perelman School of Medicine at the University of Pennsylvania", 17.5, 22], ["University of Texas Southwestern Medical Center", 17.3, 7]], "median_h": [["Cedars-Sinai Medical Center", 75.5, 4], ["Memorial Sloan Kettering Cancer Center", 38.0, 3], ["University of Maryland School of Medicine", 34.0, 3], ["Cleveland Clinic Lerner College of Medicine of Case Western Reserve University", 27.0, 8], ["University of Iowa Carver College of Medicine", 27.0, 5], ["Case Western Reserve University School of Medicine", 24.0, 3], ["The University of Texas MD Anderson Cancer Center", 24.0, 17], ["University of Washington School of Medicine", 22.0, 10], ["Massachusetts General Hospital, Harvard Medical School", 21.0, 16], ["Emory University School of Medicine", 19.0, 11], ["The Warren Alpert Medical School of Brown University", 19.0, 5], ["University of Wisconsin School of Medicine and Public Health", 17.5, 15], ["Johns Hopkins University School of Medicine", 17.5, 6], ["Medical University of South Carolina", 17.0, 10], ["Icahn School of Medicine at Mount Sinai", 16.0, 6], ["Albert Einstein College of Medicine", 16.0, 4], ["Washington University School of Medicine in St. Louis", 15.0, 18], ["Joe R. and Teresa Lozano Long School of Medicine at UT Health San Antonio", 15.0, 4], ["Stanford University School of Medicine", 14.0, 14], ["Perelman School of Medicine at the University of Pennsylvania", 14.0, 22], ["Duke University School of Medicine", 13.0, 14], ["University of Chicago Pritzker School of Medicine", 13.0, 4], ["Mayo Clinic - Phoenix", 13.0, 7], ["Yale School of Medicine", 12.0, 5], ["Mayo Clinic - Jacksonville", 12.0, 6]]}}};
+    
+    const metricLabels = {
+        'papers': 'Total Papers',
+        'citations': 'Total Citations',
+        'papers_per_faculty': 'Papers Per Faculty',
+        'mean_h': 'Mean H-Index',
+        'median_h': 'Median H-Index'
+    };
+    
+    const subspecialtyBadges = {
+        'Neuroradiology': 'badge-neuro',
+        'MSK': 'badge-msk',
+        'Breast Imaging': 'badge-breast',
+        'Nuclear Medicine': 'badge-nuclear',
+        'Pediatric Radiology': 'badge-peds',
+        'Interventional Radiology': 'badge-ir',
+        'Abdominal Imaging': 'badge-abd',
+        'Cardiothoracic Imaging': 'badge-ctr'
+    };
+    
+    const subspecialtySelect = document.getElementById('subspecialty-select');
+    const metricSelect = document.getElementById('metric-select');
+    
+    subspecialtySelect.addEventListener('change', updateResults);
+    metricSelect.addEventListener('change', updateResults);
+    
+    function formatValue(value, metric) {
+        if (value === null || value === undefined) return 'N/A';
+        if (metric === 'papers' || metric === 'citations') {
+            return parseInt(value).toLocaleString();
+        }
+        return parseFloat(value).toFixed(1);
+    }
+    
+    function updateResults() {
+        const subspecialty = subspecialtySelect.value;
+        const metric = metricSelect.value;
+        const resultsContent = document.getElementById('results-content');
+        const resultsTitle = document.getElementById('results-title');
+        const resultsInfo = document.getElementById('results-info');
+        
+        const subspecData = DATA[subspecialty];
+        if (!subspecData) {
+            resultsContent.innerHTML = '<div class="no-data"><div class="icon">❌</div><p>No data available</p></div>';
+            return;
+        }
+        
+        const rankings = subspecData.rankings[metric];
+        if (!rankings || rankings.length === 0) {
+            resultsContent.innerHTML = '<div class="no-data"><div class="icon">📭</div><p>No rankings available for this metric</p></div>';
+            return;
+        }
+        
+        const badgeClass = subspecialtyBadges[subspecialty] || '';
+        resultsTitle.innerHTML = `Top 25 by ${metricLabels[metric]} <span class="subspecialty-badge ${badgeClass}">${subspecialty}</span>`;
+        
+        const minFacultyNote = (metric === 'papers_per_faculty' || metric === 'mean_h' || metric === 'median_h') 
+            ? ' (min. 3 faculty)' : '';
+        resultsInfo.textContent = `${subspecData.total_institutions} total institutions${minFacultyNote}`;
+        
+        let html = `
+            <table class="rankings-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Institution</th>
+                        <th>Faculty</th>
+                        <th>${metricLabels[metric]}</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        rankings.forEach((row, index) => {
+            const rank = index + 1;
+            const institution = row[0];
+            const value = row[1];
+            const faculty = row[2];
+            
+            let rankClass = '';
+            let badgeHtml = rank;
+            if (rank === 1) {
+                rankClass = 'rank-1';
+                badgeHtml = '<span class="top-badge badge-gold">1</span>';
+            } else if (rank === 2) {
+                rankClass = 'rank-2';
+                badgeHtml = '<span class="top-badge badge-silver">2</span>';
+            } else if (rank === 3) {
+                rankClass = 'rank-3';
+                badgeHtml = '<span class="top-badge badge-bronze">3</span>';
+            }
+            
+            html += `
+                <tr>
+                    <td class="rank-cell ${rankClass}">${badgeHtml}</td>
+                    <td class="institution-name">${institution}</td>
+                    <td class="faculty-count">n=${parseInt(faculty)}</td>
+                    <td class="metric-value">${formatValue(value, metric)}</td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table>';
+        resultsContent.innerHTML = html;
+    }
+    
+    // Initial load
+    updateResults();
+    </script>
+</body>
+</html>
