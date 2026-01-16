@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurointerventional Radiology Percentile Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ea580c;
+            --primary-light: #f97316;
+            --primary-dark: #c2410c;
+            --accent: #fcd34d;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #1a1a2e;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 2.25rem;
+            font-weight: 400;
+            margin-bottom: 0.25rem;
+        }
+        .header p { font-size: 1rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--primary-dark);
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+        .tabs { display: flex; gap: 0; margin-bottom: 0; }
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            background: var(--border);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            border-radius: 12px 12px 0 0;
+        }
+        .tab:hover { background: #d1d5db; }
+        .tab.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-family: inherit;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group select:focus, .form-group input:focus { border-color: var(--primary); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+        .form-row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; }
+        .calculate-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+        }
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+        }
+        .result-box.show { display: block; animation: fadeIn 0.3s; }
+        .result-box.highlight-gold { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .result-percentile {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+        .result-box.highlight-gold .result-percentile { color: #b45309; }
+        .result-percentile sup { font-size: 1.5rem; }
+        .result-label { color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem; }
+        .result-comparison { 
+            margin-top: 1rem; 
+            padding-top: 1rem; 
+            border-top: 1px solid rgba(0,0,0,0.1);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .progress-bar-large {
+            height: 12px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        .progress-fill-large {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        .result-box.highlight-gold .progress-fill-large {
+            background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+        }
+        
+        .search-container { position: relative; }
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            font-size: 1.1rem;
+            font-family: inherit;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.1);
+        }
+        .autocomplete-list {
+            position: absolute;
+            top: 100%; left: 0; right: 0;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 280px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+        .autocomplete-list.show { display: block; }
+        .autocomplete-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+        }
+        .autocomplete-item:hover { background: #f3f4f6; }
+        .autocomplete-item .name { font-weight: 600; color: var(--text); }
+        .autocomplete-item .details { font-size: 0.85rem; color: var(--text-muted); }
+        
+        .person-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: none;
+        }
+        .person-header.show { display: block; }
+        .person-name { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+        .person-details { color: var(--text-muted); margin-top: 0.25rem; }
+        .person-comparison { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem; }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            display: none;
+        }
+        .metrics-grid.show { display: grid; }
+        .metric-card {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+        .metric-card.highlight {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-color: #fcd34d;
+        }
+        .metric-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .metric-card.highlight .metric-label { color: #b45309; }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        .metric-percentile {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .metric-card.highlight .metric-percentile { color: #b45309; }
+        .metric-value {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+        .progress-bar {
+            height: 6px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        .metric-card.highlight .progress-fill {
+            background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-left: 4px;
+        }
+        .tooltip .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--text-muted);
+            color: white;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 280px;
+            background: #1f2937;
+            color: white;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -140px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            font-weight: normal;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row, .form-row-4 { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Neurointerventional Radiology Percentile Calculator</h1>
+        <p>Compare your academic metrics against neurointerventional radiologists nationwide</p>
+        <div class="badge">333 Faculty from 128 Institutions</div>
+    </div>
+    
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('manual')">Enter Metrics</button>
+            <button class="tab" onclick="switchTab('lookup')">Find by Name</button>
+        </div>
+        
+        <div class="card">
+            <div id="manualTab" class="tab-content active">
+                <div class="form-row" style="margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label>Metric</label>
+                        <select id="manualMetric">
+                            <option value="citations">Total Citations</option>
+                            <option value="papers">Total Papers</option>
+                            <option value="hindex">H-Index</option>
+                            <option value="firstPapers">First Author Papers</option>
+                            <option value="firstCitations">First Author Citations</option>
+                            <option value="lastPapers">Last Author Papers</option>
+                            <option value="lastCitations">Last Author Citations</option>
+                            <option value="ryMetric">RY Metric</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Your Value</label>
+                        <input type="number" id="manualValue" placeholder="Enter value">
+                    </div>
+                    <div class="form-group">
+                        <label>Filter by Rank</label>
+                        <select id="manualRank">
+                            <option value="">All Ranks</option>
+                            <option value="1">Assistant Professor</option>
+                            <option value="2">Associate Professor</option>
+                            <option value="3">Professor</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" style="margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label>Filter by Sex</label>
+                        <select id="manualSex">
+                            <option value="">All</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Years Since First Publication</label>
+                        <select id="manualAcademicAge">
+                            <option value="">All</option>
+                            <option value="0-5">0-5 years</option>
+                            <option value="6-10">6-10 years</option>
+                            <option value="11-15">11-15 years</option>
+                            <option value="16-20">16-20 years</option>
+                            <option value="21-25">21-25 years</option>
+                            <option value="26-30">26-30 years</option>
+                            <option value="31-35">31-35 years</option>
+                            <option value="36-40">36-40 years</option>
+                            <option value=">40">&gt;40 years</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button class="calculate-btn" onclick="calculateManual()">Calculate Percentile</button>
+                    </div>
+                </div>
+                
+                <div id="manualResult" class="result-box">
+                    <div class="result-percentile" id="manualPercentile">75<sup>th</sup></div>
+                    <div class="result-label" id="manualResultLabel">percentile for Total Citations</div>
+                    <div class="progress-bar-large">
+                        <div class="progress-fill-large" id="manualProgressFill" style="width: 75%"></div>
+                    </div>
+                    <div class="result-comparison" id="manualComparison"></div>
+                </div>
+            </div>
+            
+            <div id="lookupTab" class="tab-content">
+                <div class="form-group search-container">
+                    <label>Search by Name</label>
+                    <input type="text" class="search-input" id="nameSearch" placeholder="Start typing a name...">
+                    <div class="autocomplete-list" id="autocompleteList"></div>
+                </div>
+                
+                <div class="form-row" style="margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label>Compare Against Rank</label>
+                        <select id="lookupRank" onchange="updateLookupResults()">
+                            <option value="">All Ranks</option>
+                            <option value="1">Assistant Professor</option>
+                            <option value="2">Associate Professor</option>
+                            <option value="3">Professor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Compare Against Sex</label>
+                        <select id="lookupSex" onchange="updateLookupResults()">
+                            <option value="">All</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Years Since First Publication</label>
+                        <select id="lookupAcademicAge" onchange="updateLookupResults()">
+                            <option value="">All</option>
+                            <option value="0-5">0-5 years</option>
+                            <option value="6-10">6-10 years</option>
+                            <option value="11-15">11-15 years</option>
+                            <option value="16-20">16-20 years</option>
+                            <option value="21-25">21-25 years</option>
+                            <option value="26-30">26-30 years</option>
+                            <option value="31-35">31-35 years</option>
+                            <option value="36-40">36-40 years</option>
+                            <option value=">40">&gt;40 years</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="person-header" id="personHeader">
+                    <div class="person-name" id="personName"></div>
+                    <div class="person-details" id="personDetails"></div>
+                    <div class="person-comparison" id="personComparison"></div>
+                </div>
+                
+                <div class="metrics-grid" id="metricsGrid"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    const RY_TOOLTIP = '<span class="tooltip"><span class="tooltip-icon">?</span><span class="tooltip-text"><strong>RY Metric</strong><br>Weights first/last authorship 5× more than middle authorship.<br><br>Formula: (First+Last author citations × 5) + (Middle author citations) + 10 × [(First+Last author papers × 5) + (Middle author papers)]</span></span>';
+    
+    const METRICS = [
+        { key: 'citations', label: 'Total Citations' },
+        { key: 'papers', label: 'Total Papers' },
+        { key: 'hindex', label: 'H-Index' },
+        { key: 'firstPapers', label: 'First Author Papers' },
+        { key: 'firstCitations', label: 'First Author Citations' },
+        { key: 'lastPapers', label: 'Last Author Papers' },
+        { key: 'lastCitations', label: 'Last Author Citations' },
+        { key: 'ryMetric', label: 'RY Metric', highlight: true, hasTooltip: true }
+    ];
+    
+    const rankLabels = { '1': 'Assistant Professor', '2': 'Associate Professor', '3': 'Professor' };
+    
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.tab:nth-child(${tab === 'manual' ? 1 : 2})`).classList.add('active');
+        document.getElementById(tab + 'Tab').classList.add('active');
+    }
+    
+    function filterData(rank, sex, academicAge) {
+        return DATA.filter(d => {
+            if (rank && d.rank != rank) return false;
+            if (sex && d.sex !== sex) return false;
+            if (academicAge && d.academicAgeBin !== academicAge) return false;
+            return true;
+        });
+    }
+    
+    function calculatePercentile(value, data, metric) {
+        const values = data.map(d => d[metric]).filter(v => v !== null && v !== undefined).sort((a,b) => a - b);
+        if (values.length === 0) return 0;
+        let count = 0;
+        for (let v of values) { if (v < value) count++; else if (v === value) count += 0.5; }
+        return Math.round((count / values.length) * 100);
+    }
+    
+    function getOrdinal(n) {
+        const s = ['th','st','nd','rd'], v = n % 100;
+        return n + (s[(v-20)%10] || s[v] || s[0]);
+    }
+    
+    function calculateManual() {
+        const metric = document.getElementById('manualMetric').value;
+        const value = parseFloat(document.getElementById('manualValue').value);
+        const rank = document.getElementById('manualRank').value;
+        const sex = document.getElementById('manualSex').value;
+        const academicAge = document.getElementById('manualAcademicAge').value;
+        
+        if (isNaN(value)) { alert('Please enter a valid number'); return; }
+        
+        const filtered = filterData(rank, sex, academicAge);
+        if (filtered.length === 0) { alert('No data matches your filters'); return; }
+        
+        const percentile = calculatePercentile(value, filtered, metric);
+        const metricLabel = METRICS.find(m => m.key === metric).label;
+        
+        const resultBox = document.getElementById('manualResult');
+        resultBox.classList.remove('highlight-gold');
+        if (metric === 'ryMetric') resultBox.classList.add('highlight-gold');
+        
+        document.getElementById('manualPercentile').innerHTML = percentile + '<sup>' + (percentile === 1 ? 'st' : percentile === 2 ? 'nd' : percentile === 3 ? 'rd' : 'th') + '</sup>';
+        document.getElementById('manualResultLabel').textContent = 'percentile for ' + metricLabel;
+        document.getElementById('manualProgressFill').style.width = percentile + '%';
+        
+        let comparison = 'Compared against ' + filtered.length + ' neurointerventional radiologists';
+        const parts = [];
+        if (rank) parts.push(rankLabels[rank] + 's');
+        if (sex) parts.push(sex === 'M' ? 'males' : 'females');
+        if (academicAge) parts.push(academicAge + ' years since first publication');
+        if (parts.length) comparison += ' (' + parts.join(', ') + ')';
+        document.getElementById('manualComparison').textContent = comparison;
+        
+        resultBox.classList.add('show');
+    }
+    
+    let selectedPerson = null;
+    const searchInput = document.getElementById('nameSearch');
+    const autocompleteList = document.getElementById('autocompleteList');
+    
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        if (query.length < 2) { autocompleteList.classList.remove('show'); return; }
+        
+        const matches = DATA.filter(d => d.name.toLowerCase().includes(query)).slice(0, 10);
+        if (matches.length === 0) { autocompleteList.classList.remove('show'); return; }
+        
+        autocompleteList.innerHTML = matches.map(d => {
+            const rankText = d.rank ? rankLabels[d.rank] : 'No rank';
+            return '<div class="autocomplete-item" data-name="' + d.name + '">' +
+                '<div class="name">' + d.name + '</div>' +
+                '<div class="details">' + rankText + ' • H-index: ' + d.hindex + '</div></div>';
+        }).join('');
+        autocompleteList.classList.add('show');
+    });
+    
+    autocompleteList.addEventListener('click', function(e) {
+        const item = e.target.closest('.autocomplete-item');
+        if (item) {
+            const name = item.dataset.name;
+            selectedPerson = DATA.find(d => d.name === name);
+            searchInput.value = name;
+            autocompleteList.classList.remove('show');
+            updateLookupResults();
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-container')) autocompleteList.classList.remove('show');
+    });
+    
+    function updateLookupResults() {
+        if (!selectedPerson) return;
+        
+        const rank = document.getElementById('lookupRank').value;
+        const sex = document.getElementById('lookupSex').value;
+        const academicAge = document.getElementById('lookupAcademicAge').value;
+        const filtered = filterData(rank, sex, academicAge);
+        
+        const header = document.getElementById('personHeader');
+        const rankText = selectedPerson.rank ? rankLabels[selectedPerson.rank] : 'No rank';
+        document.getElementById('personName').textContent = selectedPerson.name;
+        document.getElementById('personDetails').textContent = rankText + ' • ' + (selectedPerson.sex === 'M' ? 'Male' : 'Female') + ' • ' + selectedPerson.academicAge + ' years since first publication';
+        
+        let comparison = 'Compared against ' + filtered.length + ' neurointerventional radiologists';
+        const parts = [];
+        if (rank) parts.push(rankLabels[rank] + 's');
+        if (sex) parts.push(sex === 'M' ? 'males' : 'females');
+        if (academicAge) parts.push(academicAge + ' years since first publication');
+        if (parts.length) comparison += ' (' + parts.join(', ') + ')';
+        document.getElementById('personComparison').textContent = comparison;
+        header.classList.add('show');
+        
+        const grid = document.getElementById('metricsGrid');
+        grid.innerHTML = METRICS.map(m => {
+            const val = selectedPerson[m.key];
+            const pct = calculatePercentile(val, filtered, m.key);
+            const hl = m.highlight ? 'highlight' : '';
+            const tooltip = m.hasTooltip ? RY_TOOLTIP : '';
+            const star = m.highlight ? '★ ' : '';
+            return '<div class="metric-card ' + hl + '">' +
+                '<div class="metric-label">' + star + m.label + tooltip + '</div>' +
+                '<div class="metric-row">' +
+                '<div class="metric-percentile">' + pct + '<sup style="font-size:0.6em">th</sup></div>' +
+                '<div class="metric-value">' + val.toLocaleString() + '</div>' +
+                '</div>' +
+                '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+                '</div>';
+        }).join('');
+        grid.classList.add('show');
+    }
+    
+    document.getElementById('manualValue').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') calculateManual();
+    });
+    
+    // DATA
+    const DATA = [
+{name:'Mark Harrigan',rank:3,sex:'M',hindex:0,citations:0,papers:1,firstPapers:1,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:50,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Jesse Jones',rank:2,sex:'M',hindex:11,citations:470,papers:59,firstPapers:11,firstCitations:30,lastPapers:11,lastCitations:38,ryMetric:2212,firstPubYear:2015,academicAge:10,academicAgeBin:'6-10'},
+{name:'Mudassar Kamran',rank:1,sex:'M',hindex:13,citations:807,papers:35,firstPapers:10,firstCitations:245,lastPapers:1,lastCitations:272,ryMetric:3665,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Satya Patro',rank:2,sex:'M',hindex:12,citations:411,papers:35,firstPapers:8,firstCitations:89,lastPapers:5,lastCitations:53,ryMetric:1849,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Todd Abruzzo',rank:3,sex:'M',hindex:29,citations:3114,papers:163,firstPapers:24,firstCitations:308,lastPapers:33,lastCitations:321,ryMetric:9540,firstPubYear:1998,academicAge:27,academicAgeBin:'26-30'},
+{name:'Felipe Albuquerque',rank:3,sex:'M',hindex:69,citations:19043,papers:587,firstPapers:128,firstCitations:1148,lastPapers:110,lastCitations:2367,ryMetric:48493,firstPubYear:1982,academicAge:43,academicAgeBin:'>40'},
+{name:'Michael Avery',rank:1,sex:'M',hindex:2,citations:12,papers:2,firstPapers:1,firstCitations:10,lastPapers:1,lastCitations:2,ryMetric:160,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Bernard Bendok',rank:3,sex:'M',hindex:56,citations:12725,papers:595,firstPapers:55,firstCitations:633,lastPapers:295,lastCitations:2840,ryMetric:46567,firstPubYear:1982,academicAge:43,academicAgeBin:'>40'},
+{name:'Andrew Ducruet',rank:1,sex:'M',hindex:45,citations:8499,papers:334,firstPapers:31,firstCitations:1371,lastPapers:65,lastCitations:682,ryMetric:23311,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'Daniel Lee',rank:1,sex:'M',hindex:5,citations:146,papers:7,firstPapers:2,firstCitations:61,lastPapers:0,lastCitations:0,ryMetric:540,firstPubYear:2015,academicAge:10,academicAgeBin:'6-10'},
+{name:'Neil Majmundar',rank:1,sex:'M',hindex:17,citations:967,papers:70,firstPapers:18,firstCitations:135,lastPapers:2,lastCitations:6,ryMetric:3031,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Michael Alexander',rank:3,sex:'M',hindex:33,citations:6194,papers:107,firstPapers:22,firstCitations:756,lastPapers:27,lastCitations:369,ryMetric:13724,firstPubYear:1994,academicAge:31,academicAgeBin:'31-35'},
+{name:'Matthew Amans',rank:3,sex:'M',hindex:25,citations:1744,papers:117,firstPapers:14,firstCitations:176,lastPapers:27,lastCitations:380,ryMetric:6778,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Daniel Cooke',rank:3,sex:'M',hindex:1,citations:43,papers:1,firstPapers:1,firstCitations:43,lastPapers:0,lastCitations:0,ryMetric:265,firstPubYear:1927,academicAge:98,academicAgeBin:'>40'},
+{name:'Huy Do',rank:3,sex:'M',hindex:42,citations:6137,papers:151,firstPapers:8,firstCitations:309,lastPapers:28,lastCitations:719,ryMetric:13199,firstPubYear:1994,academicAge:31,academicAgeBin:'31-35'},
+{name:'Gary Duckwiler',rank:3,sex:'M',hindex:80,citations:25397,papers:300,firstPapers:20,firstCitations:238,lastPapers:54,lastCitations:3941,ryMetric:46144,firstPubYear:1986,academicAge:39,academicAgeBin:'36-40'},
+{name:'Justin Dye',rank:1,sex:'M',hindex:9,citations:303,papers:27,firstPapers:5,firstCitations:92,lastPapers:6,lastCitations:25,ryMetric:1481,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Paula Eboli',rank:1,sex:'F',hindex:9,citations:320,papers:19,firstPapers:8,firstCitations:104,lastPapers:3,lastCitations:4,ryMetric:1365,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Nestor Gonzalez',rank:3,sex:'M',hindex:40,citations:4906,papers:156,firstPapers:29,firstCitations:872,lastPapers:25,lastCitations:500,ryMetric:13534,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Phillip Grigsby',rank:1,sex:'M',hindex:2,citations:17,papers:2,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:37,firstPubYear:2017,academicAge:8,academicAgeBin:'6-10'},
+{name:'Jeremy Heit',rank:2,sex:'M',hindex:41,citations:12277,papers:332,firstPapers:32,firstCitations:1547,lastPapers:76,lastCitations:1554,ryMetric:32321,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Steven William Hetts',rank:3,sex:'M',hindex:42,citations:8134,papers:281,firstPapers:31,firstCitations:1439,lastPapers:70,lastCitations:1253,ryMetric:25613,firstPubYear:1994,academicAge:31,academicAgeBin:'31-35'},
+{name:'J. Paul Jacobson',rank:3,sex:'M',hindex:7,citations:180,papers:12,firstPapers:2,firstCitations:15,lastPapers:4,lastCitations:27,ryMetric:708,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Reza Jahan',rank:3,sex:'M',hindex:67,citations:29011,papers:237,firstPapers:20,firstCitations:1070,lastPapers:11,lastCitations:4965,ryMetric:56537,firstPubYear:1995,academicAge:30,academicAgeBin:'26-30'},
+{name:'Jeremiah Johnson',rank:2,sex:'M',hindex:15,citations:770,papers:34,firstPapers:9,firstCitations:196,lastPapers:15,lastCitations:348,ryMetric:4246,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Alexander Khalessi',rank:3,sex:'M',hindex:33,citations:7084,papers:186,firstPapers:18,firstCitations:138,lastPapers:51,lastCitations:880,ryMetric:15776,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Richard Latchaw',rank:3,sex:'M',hindex:47,citations:7927,papers:200,firstPapers:51,firstCitations:1469,lastPapers:51,lastCitations:1064,ryMetric:24139,firstPubYear:1973,academicAge:52,academicAgeBin:'>40'},
+{name:'William Mack',rank:3,sex:'M',hindex:2,citations:104,papers:2,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:124,firstPubYear:2017,academicAge:8,academicAgeBin:'6-10'},
+{name:'Michael Marks',rank:3,sex:'M',hindex:81,citations:28151,papers:267,firstPapers:34,firstCitations:2755,lastPapers:57,lastCitations:5507,ryMetric:67509,firstPubYear:1988,academicAge:37,academicAgeBin:'36-40'},
+{name:'Marcel Maya',rank:3,sex:'M',hindex:33,citations:3729,papers:113,firstPapers:3,firstCitations:9,lastPapers:17,lastCitations:541,ryMetric:7859,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'Franklin Moser',rank:3,sex:'M',hindex:34,citations:4322,papers:88,firstPapers:14,firstCitations:448,lastPapers:18,lastCitations:626,ryMetric:10778,firstPubYear:1985,academicAge:40,academicAgeBin:'36-40'},
+{name:'Kazim Narsinh',rank:1,sex:'M',hindex:27,citations:2728,papers:98,firstPapers:24,firstCitations:961,lastPapers:9,lastCitations:62,ryMetric:9120,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Andrew Nguyen',rank:1,sex:'M',hindex:12,citations:451,papers:49,firstPapers:10,firstCitations:122,lastPapers:3,lastCitations:13,ryMetric:2001,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Jeffrey Scott Pannell',rank:2,sex:'M',hindex:17,citations:1164,papers:66,firstPapers:4,firstCitations:9,lastPapers:5,lastCitations:5,ryMetric:2240,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Daniel Raper',rank:1,sex:'M',hindex:32,citations:4929,papers:140,firstPapers:42,firstCitations:757,lastPapers:6,lastCitations:18,ryMetric:11349,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Shuichi Suzuki',rank:3,sex:'M',hindex:17,citations:2506,papers:44,firstPapers:9,firstCitations:343,lastPapers:4,lastCitations:9,ryMetric:4874,firstPubYear:1993,academicAge:32,academicAgeBin:'31-35'},
+{name:'Viktor Szeder',rank:2,sex:'M',hindex:21,citations:1735,papers:69,firstPapers:6,firstCitations:91,lastPapers:5,lastCitations:69,ryMetric:2723,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Satoshi Tateshima',rank:3,sex:'M',hindex:42,citations:5700,papers:189,firstPapers:21,firstCitations:727,lastPapers:29,lastCitations:284,ryMetric:13014,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'Nicholas Alexander Telischak',rank:2,sex:'M',hindex:14,citations:1255,papers:36,firstPapers:10,firstCitations:336,lastPapers:4,lastCitations:37,ryMetric:3125,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Matthew Tenser',rank:1,sex:'M',hindex:13,citations:537,papers:24,firstPapers:2,firstCitations:28,lastPapers:1,lastCitations:16,ryMetric:903,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Ben Waldau',rank:1,sex:'M',hindex:13,citations:1062,papers:56,firstPapers:13,firstCitations:312,lastPapers:28,lastCitations:580,ryMetric:6830,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Tianzan Zhou',rank:null,sex:'M',hindex:5,citations:159,papers:6,firstPapers:1,firstCitations:43,lastPapers:0,lastCitations:0,ryMetric:431,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'David Case',rank:2,sex:'M',hindex:10,citations:763,papers:30,firstPapers:4,firstCitations:53,lastPapers:3,lastCitations:9,ryMetric:1591,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Christopher Roark',rank:2,sex:'M',hindex:12,citations:561,papers:43,firstPapers:8,firstCitations:51,lastPapers:5,lastCitations:18,ryMetric:1787,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Joshua Seinfeld',rank:3,sex:'M',hindex:13,citations:695,papers:41,firstPapers:4,firstCitations:93,lastPapers:8,lastCitations:70,ryMetric:2237,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Amanda Baker',rank:1,sex:'F',hindex:8,citations:209,papers:11,firstPapers:7,firstCitations:71,lastPapers:0,lastCitations:0,ryMetric:883,firstPubYear:2016,academicAge:9,academicAgeBin:'6-10'},
+{name:'Ketan Bulsara',rank:3,sex:'M',hindex:46,citations:6686,papers:221,firstPapers:40,firstCitations:870,lastPapers:65,lastCitations:1020,ryMetric:20656,firstPubYear:1996,academicAge:29,academicAgeBin:'26-30'},
+{name:'Michele Johnson',rank:3,sex:'F',hindex:0,citations:0,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:10,firstPubYear:2025,academicAge:0,academicAgeBin:'0-5'},
+{name:'Nanthiya Sujijantarat',rank:1,sex:'F',hindex:13,citations:496,papers:52,firstPapers:11,firstCitations:91,lastPapers:4,lastCitations:4,ryMetric:1996,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Akli Zetchi',rank:1,sex:'M',hindex:8,citations:154,papers:16,firstPapers:2,firstCitations:18,lastPapers:0,lastCitations:0,ryMetric:466,firstPubYear:2018,academicAge:7,academicAgeBin:'6-10'},
+{name:'Ehsan Dowlati',rank:1,sex:'M',hindex:16,citations:743,papers:93,firstPapers:32,firstCitations:192,lastPapers:3,lastCitations:10,ryMetric:3881,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Abdullah Feroze',rank:1,sex:'M',hindex:28,citations:17239,papers:81,firstPapers:5,firstCitations:124,lastPapers:0,lastCitations:0,ryMetric:3587,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Andre Luiz Beer-Furlan',rank:1,sex:'M',hindex:20,citations:1354,papers:117,firstPapers:38,firstCitations:301,lastPapers:3,lastCitations:3,ryMetric:5254,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'W. Christopher Fox',rank:3,sex:'M',hindex:19,citations:1053,papers:91,firstPapers:5,firstCitations:65,lastPapers:18,lastCitations:106,ryMetric:3567,firstPubYear:2003,academicAge:22,academicAgeBin:'21-25'},
+{name:'Jimmy Ghostine',rank:1,sex:'M',hindex:7,citations:210,papers:13,firstPapers:1,firstCitations:4,lastPapers:0,lastCitations:0,ryMetric:396,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Waldo Rigoberto Guerrero',rank:1,sex:'M',hindex:19,citations:1091,papers:86,firstPapers:16,firstCitations:177,lastPapers:1,lastCitations:12,ryMetric:3387,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Brian Hoh',rank:3,sex:'M',hindex:62,citations:34209,papers:311,firstPapers:61,firstCitations:3244,lastPapers:95,lastCitations:2134,ryMetric:65071,firstPubYear:1997,academicAge:28,academicAgeBin:'26-30'},
+{name:'Thien Huynh',rank:null,sex:'M',hindex:19,citations:1874,papers:88,firstPapers:12,firstCitations:224,lastPapers:4,lastCitations:29,ryMetric:3820,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Maxim Mokin',rank:3,sex:'M',hindex:49,citations:8253,papers:283,firstPapers:67,firstCitations:2211,lastPapers:21,lastCitations:202,ryMetric:24085,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Michal Obrzut',rank:null,sex:'M',hindex:4,citations:60,papers:20,firstPapers:0,firstCitations:0,lastPapers:8,lastCitations:11,ryMetric:624,firstPubYear:2016,academicAge:9,academicAgeBin:'6-10'},
+{name:'Mubashir Pervez',rank:null,sex:'M',hindex:5,citations:264,papers:8,firstPapers:1,firstCitations:48,lastPapers:1,lastCitations:14,ryMetric:672,firstPubYear:2018,academicAge:7,academicAgeBin:'6-10'},
+{name:'Keith Peters',rank:2,sex:'M',hindex:20,citations:916,papers:46,firstPapers:3,firstCitations:96,lastPapers:14,lastCitations:393,ryMetric:4012,firstPubYear:1991,academicAge:34,academicAgeBin:'31-35'},
+{name:'Robert Regenhardt',rank:1,sex:'M',hindex:31,citations:4088,papers:218,firstPapers:28,firstCitations:1174,lastPapers:14,lastCitations:67,ryMetric:12912,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Vasu Saini',rank:null,sex:'M',hindex:17,citations:1849,papers:47,firstPapers:7,firstCitations:1042,lastPapers:0,lastCitations:0,ryMetric:6723,firstPubYear:2015,academicAge:10,academicAgeBin:'6-10'},
+{name:'Robert Starke',rank:3,sex:'M',hindex:80,citations:21452,papers:713,firstPapers:101,firstCitations:3457,lastPapers:96,lastCitations:1237,ryMetric:55198,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Rabih Tawk',rank:2,sex:'M',hindex:27,citations:2622,papers:180,firstPapers:23,firstCitations:476,lastPapers:54,lastCitations:375,ryMetric:10862,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Kunal Vakharia',rank:1,sex:'M',hindex:18,citations:1073,papers:143,firstPapers:32,firstCitations:73,lastPapers:17,lastCitations:17,ryMetric:4823,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Feras Akbik',rank:1,sex:'M',hindex:12,citations:591,papers:41,firstPapers:19,firstCitations:463,lastPapers:5,lastCitations:8,ryMetric:3845,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Jonathan Grossberg',rank:3,sex:'M',hindex:37,citations:5133,papers:196,firstPapers:13,firstCitations:335,lastPapers:18,lastCitations:185,ryMetric:9871,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Diogo Haussen',rank:1,sex:'M',hindex:58,citations:15379,papers:312,firstPapers:42,firstCitations:1369,lastPapers:45,lastCitations:806,ryMetric:29928,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Brian Howard',rank:2,sex:'M',hindex:22,citations:1617,papers:138,firstPapers:34,firstCitations:396,lastPapers:10,lastCitations:27,ryMetric:6449,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Aqueel Pabaney',rank:1,sex:'M',hindex:12,citations:385,papers:54,firstPapers:12,firstCitations:119,lastPapers:2,lastCitations:27,ryMetric:2069,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Frank Tong',rank:2,sex:'M',hindex:27,citations:1937,papers:68,firstPapers:5,firstCitations:187,lastPapers:9,lastCitations:255,ryMetric:4945,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'Ferdinand Hui',rank:3,sex:'M',hindex:34,citations:4779,papers:222,firstPapers:26,firstCitations:459,lastPapers:65,lastCitations:882,ryMetric:15779,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Yi Jonathan Zhang',rank:null,sex:'M',hindex:3,citations:37,papers:14,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:177,firstPubYear:2023,academicAge:2,academicAgeBin:'0-5'},
+{name:'Minako Hayakawa',rank:1,sex:'F',hindex:18,citations:749,papers:43,firstPapers:0,firstCitations:0,lastPapers:4,lastCitations:113,ryMetric:1791,firstPubYear:1994,academicAge:31,academicAgeBin:'31-35'},
+{name:'Santiago Ortega',rank:2,sex:'M',hindex:40,citations:10769,papers:292,firstPapers:20,firstCitations:214,lastPapers:72,lastCitations:977,ryMetric:21844,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Edgar Samaniego',rank:3,sex:'M',hindex:33,citations:4167,papers:247,firstPapers:42,firstCitations:1019,lastPapers:56,lastCitations:585,ryMetric:16973,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Ramez Nader Abdalla',rank:1,sex:'M',hindex:7,citations:221,papers:25,firstPapers:5,firstCitations:33,lastPapers:0,lastCitations:0,ryMetric:803,firstPubYear:2018,academicAge:7,academicAgeBin:'6-10'},
+{name:'Ali Alaraj',rank:3,sex:'M',hindex:31,citations:3592,papers:264,firstPapers:40,firstCitations:568,lastPapers:94,lastCitations:959,ryMetric:17621,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Sameer Ansari',rank:3,sex:'M',hindex:42,citations:9329,papers:184,firstPapers:15,firstCitations:476,lastPapers:33,lastCitations:677,ryMetric:17701,firstPubYear:1996,academicAge:29,academicAgeBin:'26-30'},
+{name:'Michael Casey',rank:null,sex:'M',hindex:25,citations:2405,papers:85,firstPapers:0,firstCitations:0,lastPapers:30,lastCitations:343,ryMetric:5827,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Michael Chen',rank:3,sex:'M',hindex:34,citations:9162,papers:125,firstPapers:32,firstCitations:186,lastPapers:27,lastCitations:440,ryMetric:14786,firstPubYear:2005,academicAge:20,academicAgeBin:'16-20'},
+{name:'Michael Hurley',rank:3,sex:'M',hindex:26,citations:2251,papers:120,firstPapers:27,firstCitations:159,lastPapers:10,lastCitations:140,ryMetric:6127,firstPubYear:2005,academicAge:20,academicAgeBin:'16-20'},
+{name:'Babak Jahromi',rank:3,sex:'M',hindex:29,citations:2844,papers:142,firstPapers:17,firstCitations:402,lastPapers:26,lastCitations:416,ryMetric:9118,firstPubYear:1992,academicAge:33,academicAgeBin:'31-35'},
+{name:'Krishna Joshi',rank:1,sex:'M',hindex:0,citations:0,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:10,firstPubYear:2023,academicAge:2,academicAgeBin:'0-5'},
+{name:'Anthony Kam',rank:1,sex:'M',hindex:8,citations:1691,papers:10,firstPapers:2,firstCitations:62,lastPapers:0,lastCitations:0,ryMetric:2119,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Stephan Munich',rank:2,sex:'M',hindex:18,citations:1751,papers:89,firstPapers:37,firstCitations:710,lastPapers:8,lastCitations:147,ryMetric:7869,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Matthew Potts',rank:2,sex:'M',hindex:34,citations:4128,papers:133,firstPapers:34,firstCitations:1294,lastPapers:22,lastCitations:194,ryMetric:13650,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Eric Russell',rank:3,sex:'M',hindex:40,citations:5530,papers:190,firstPapers:41,firstCitations:591,lastPapers:47,lastCitations:1245,ryMetric:18294,firstPubYear:1978,academicAge:47,academicAgeBin:'>40'},
+{name:'Ali Shaibani',rank:3,sex:'M',hindex:29,citations:2392,papers:129,firstPapers:8,firstCitations:80,lastPapers:28,lastCitations:481,ryMetric:7366,firstPubYear:1994,academicAge:31,academicAgeBin:'31-35'},
+{name:'Harish Shownkeen',rank:null,sex:'M',hindex:6,citations:625,papers:11,firstPapers:1,firstCitations:3,lastPapers:2,lastCitations:92,ryMetric:1235,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Khaled Asi',rank:null,sex:'M',hindex:6,citations:692,papers:7,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:762,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'Bradley Bohnstedt',rank:2,sex:'M',hindex:23,citations:1547,papers:91,firstPapers:13,firstCitations:289,lastPapers:20,lastCitations:120,ryMetric:5413,firstPubYear:2005,academicAge:20,academicAgeBin:'16-20'},
+{name:'Jerry Kovoor',rank:2,sex:'M',hindex:21,citations:1136,papers:58,firstPapers:7,firstCitations:132,lastPapers:13,lastCitations:224,ryMetric:3940,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Kaustubh Limaye',rank:2,sex:'M',hindex:18,citations:1359,papers:72,firstPapers:19,firstCitations:212,lastPapers:4,lastCitations:3,ryMetric:3317,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'Devi Patra',rank:2,sex:'M',hindex:19,citations:1087,papers:125,firstPapers:22,firstCitations:82,lastPapers:8,lastCitations:11,ryMetric:3909,firstPubYear:2017,academicAge:8,academicAgeBin:'6-10'},
+{name:'Juan Tejada',rank:3,sex:'M',hindex:5,citations:289,papers:17,firstPapers:2,firstCitations:76,lastPapers:5,lastCitations:49,ryMetric:1239,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Koji Ebersole',rank:3,sex:'M',hindex:11,citations:451,papers:42,firstPapers:0,firstCitations:0,lastPapers:18,lastCitations:85,ryMetric:1931,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Ernest Madarang',rank:1,sex:'M',hindex:2,citations:13,papers:4,firstPapers:0,firstCitations:0,lastPapers:1,lastCitations:7,ryMetric:121,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Jeremy Peterson',rank:1,sex:'M',hindex:10,citations:380,papers:38,firstPapers:5,firstCitations:14,lastPapers:2,lastCitations:1,ryMetric:1100,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Josh Abecassis',rank:2,sex:'M',hindex:19,citations:1169,papers:88,firstPapers:34,firstCitations:496,lastPapers:5,lastCitations:6,ryMetric:5617,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Mais Al-Kawaz',rank:1,sex:'F',hindex:13,citations:469,papers:29,firstPapers:9,firstCitations:281,lastPapers:1,lastCitations:3,ryMetric:2295,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Dale Ding',rank:2,sex:'M',hindex:47,citations:5645,papers:203,firstPapers:139,firstCitations:2435,lastPapers:1,lastCitations:1,ryMetric:23019,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'David Dornbos',rank:1,sex:'M',hindex:23,citations:1758,papers:103,firstPapers:28,firstCitations:350,lastPapers:2,lastCitations:8,ryMetric:5420,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Justin Fraser',rank:3,sex:'M',hindex:44,citations:6378,papers:189,firstPapers:32,firstCitations:1320,lastPapers:48,lastCitations:932,ryMetric:20459,firstPubYear:1999,academicAge:26,academicAgeBin:'26-30'},
+{name:'Wei Liu',rank:1,sex:'M',hindex:5,citations:62,papers:9,firstPapers:2,firstCitations:37,lastPapers:3,lastCitations:2,ryMetric:508,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Hugo Cuellar-Saenz',rank:3,sex:'M',hindex:15,citations:588,papers:53,firstPapers:0,firstCitations:0,lastPapers:5,lastCitations:14,ryMetric:1374,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Robert Dawson',rank:3,sex:'M',hindex:18,citations:1282,papers:30,firstPapers:8,firstCitations:338,lastPapers:7,lastCitations:227,ryMetric:4442,firstPubYear:1988,academicAge:37,academicAgeBin:'36-40'},
+{name:'Aaron Dumont',rank:3,sex:'M',hindex:67,citations:17058,papers:606,firstPapers:56,firstCitations:960,lastPapers:135,lastCitations:3748,ryMetric:49590,firstPubYear:1998,academicAge:27,academicAgeBin:'26-30'},
+{name:'Mohamad Abdalkader',rank:2,sex:'M',hindex:30,citations:3433,papers:252,firstPapers:36,firstCitations:487,lastPapers:9,lastCitations:59,ryMetric:9871,firstPubYear:2017,academicAge:8,academicAgeBin:'6-10'},
+{name:'Peter Amenta',rank:2,sex:'M',hindex:0,citations:0,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:10,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'Vania Anagnostakou',rank:1,sex:'F',hindex:14,citations:604,papers:56,firstPapers:9,firstCitations:102,lastPapers:2,lastCitations:13,ryMetric:2064,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Mohammad Ali Aziz-Sultan',rank:2,sex:'M',hindex:35,citations:4486,papers:199,firstPapers:6,firstCitations:20,lastPapers:60,lastCitations:944,ryMetric:12929,firstPubYear:1999,academicAge:26,academicAgeBin:'26-30'},
+{name:'Justin Granstein',rank:1,sex:'M',hindex:5,citations:136,papers:32,firstPapers:4,firstCitations:5,lastPapers:2,lastCitations:3,ryMetric:728,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Joshua Hirsch',rank:2,sex:'M',hindex:80,citations:28250,papers:804,firstPapers:76,firstCitations:1160,lastPapers:399,lastCitations:14642,ryMetric:118498,firstPubYear:1990,academicAge:35,academicAgeBin:'31-35'},
+{name:'Anna Luisa Kuhn',rank:1,sex:'F',hindex:29,citations:3529,papers:201,firstPapers:46,firstCitations:582,lastPapers:9,lastCitations:5,ryMetric:9458,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Francesco Massari',rank:2,sex:'M',hindex:25,citations:2422,papers:58,firstPapers:2,firstCitations:178,lastPapers:1,lastCitations:9,ryMetric:2665,firstPubYear:2003,academicAge:22,academicAgeBin:'21-25'},
+{name:'Christopher Ogilvy',rank:3,sex:'M',hindex:81,citations:28229,papers:763,firstPapers:107,firstCitations:2672,lastPapers:269,lastCitations:4850,ryMetric:80987,firstPubYear:1955,academicAge:70,academicAgeBin:'>40'},
+{name:'Darren Orbach',rank:2,sex:'M',hindex:35,citations:3552,papers:151,firstPapers:16,firstCitations:240,lastPapers:55,lastCitations:1344,ryMetric:14137,firstPubYear:1996,academicAge:29,academicAgeBin:'26-30'},
+{name:'Ajit Puri',rank:3,sex:'M',hindex:45,citations:8675,papers:306,firstPapers:30,firstCitations:298,lastPapers:44,lastCitations:1400,ryMetric:20737,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'James Rabinov',rank:2,sex:'M',hindex:37,citations:5301,papers:165,firstPapers:11,firstCitations:578,lastPapers:18,lastCitations:441,ryMetric:12187,firstPubYear:1998,academicAge:27,academicAgeBin:'26-30'},
+{name:'Pokmeng (Alfred) See',rank:1,sex:'M',hindex:21,citations:2238,papers:128,firstPapers:33,firstCitations:300,lastPapers:18,lastCitations:57,ryMetric:6986,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Justin Caplan',rank:1,sex:'M',hindex:26,citations:2429,papers:142,firstPapers:15,firstCitations:153,lastPapers:6,lastCitations:106,ryMetric:5668,firstPubYear:1982,academicAge:43,academicAgeBin:'>40'},
+{name:'Jacob Cherian',rank:2,sex:'M',hindex:17,citations:911,papers:57,firstPapers:17,firstCitations:207,lastPapers:3,lastCitations:0,ryMetric:3109,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Daniel Felbaum',rank:1,sex:'M',hindex:16,citations:829,papers:87,firstPapers:14,firstCitations:79,lastPapers:20,lastCitations:174,ryMetric:4071,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Dheeraj Gandhi',rank:3,sex:'M',hindex:45,citations:9096,papers:326,firstPapers:29,firstCitations:852,lastPapers:126,lastCitations:2157,ryMetric:30474,firstPubYear:1997,academicAge:28,academicAgeBin:'26-30'},
+{name:'Timothy Ryan Miller',rank:3,sex:'M',hindex:17,citations:1088,papers:62,firstPapers:20,firstCitations:566,lastPapers:0,lastCitations:0,ryMetric:4772,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Monica Smith Pearl',rank:3,sex:'F',hindex:24,citations:1788,papers:85,firstPapers:21,firstCitations:385,lastPapers:21,lastCitations:343,ryMetric:7230,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Paul Singh',rank:2,sex:'M',hindex:15,citations:2397,papers:31,firstPapers:0,firstCitations:0,lastPapers:6,lastCitations:40,ryMetric:3107,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Neeraj Chaudhary',rank:3,sex:'M',hindex:27,citations:3266,papers:180,firstPapers:17,firstCitations:246,lastPapers:33,lastCitations:262,ryMetric:9098,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Horia Marin',rank:null,sex:'M',hindex:14,citations:1036,papers:50,firstPapers:4,firstCitations:59,lastPapers:8,lastCitations:90,ryMetric:2612,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'Aditya Swarup Pandey',rank:3,sex:'M',hindex:32,citations:4804,papers:286,firstPapers:25,firstCitations:456,lastPapers:99,lastCitations:1043,ryMetric:18482,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Mohammed Fazlur Rehman',rank:null,sex:'M',hindex:11,citations:403,papers:32,firstPapers:3,firstCitations:6,lastPapers:7,lastCitations:6,ryMetric:1033,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Fazeel Siddiqui',rank:null,sex:'M',hindex:15,citations:750,papers:52,firstPapers:13,firstCitations:422,lastPapers:6,lastCitations:63,ryMetric:3970,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Zachary Wilseck',rank:1,sex:'M',hindex:8,citations:342,papers:37,firstPapers:10,firstCitations:65,lastPapers:1,lastCitations:0,ryMetric:1412,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Waleed Brinjikji',rank:3,sex:'M',hindex:68,citations:20472,papers:600,firstPapers:154,firstCitations:7701,lastPapers:130,lastCitations:3023,ryMetric:80728,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Harry Cloft',rank:3,sex:'M',hindex:71,citations:22271,papers:454,firstPapers:67,firstCitations:2260,lastPapers:89,lastCitations:6172,ryMetric:66779,firstPubYear:1982,academicAge:43,academicAgeBin:'>40'},
+{name:'Andrew Grande',rank:3,sex:'M',hindex:22,citations:2521,papers:108,firstPapers:6,firstCitations:251,lastPapers:25,lastCitations:254,ryMetric:6255,firstPubYear:1998,academicAge:27,academicAgeBin:'26-30'},
+{name:'Bharathi Dasan Jagadeesan',rank:3,sex:'M',hindex:22,citations:2450,papers:83,firstPapers:21,firstCitations:276,lastPapers:10,lastCitations:91,ryMetric:5382,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'David Kallmes',rank:3,sex:'M',hindex:95,citations:42800,papers:995,firstPapers:88,firstCitations:4852,lastPapers:440,lastCitations:15544,ryMetric:155454,firstPubYear:1996,academicAge:29,academicAgeBin:'26-30'},
+{name:'Yasha Kayan',rank:null,sex:'M',hindex:18,citations:927,papers:35,firstPapers:4,firstCitations:109,lastPapers:2,lastCitations:10,ryMetric:1993,firstPubYear:2016,academicAge:9,academicAgeBin:'6-10'},
+{name:'Giuseppe Lanzino',rank:3,sex:'M',hindex:78,citations:27627,papers:909,firstPapers:119,firstCitations:2893,lastPapers:317,lastCitations:6765,ryMetric:92789,firstPubYear:1982,academicAge:43,academicAgeBin:'>40'},
+{name:'Patrick Brown',rank:2,sex:'M',hindex:10,citations:209,papers:17,firstPapers:3,firstCitations:4,lastPapers:0,lastCitations:0,ryMetric:515,firstPubYear:2020,academicAge:5,academicAgeBin:'0-5'},
+{name:'Kyle Fargen',rank:2,sex:'M',hindex:42,citations:6358,papers:293,firstPapers:124,firstCitations:2198,lastPapers:44,lastCitations:716,ryMetric:27647,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Stacey Quintero Wolfe',rank:3,sex:'F',hindex:31,citations:4297,papers:193,firstPapers:19,firstCitations:329,lastPapers:27,lastCitations:858,ryMetric:12677,firstPubYear:2005,academicAge:20,academicAgeBin:'16-20'},
+{name:'Mithun Sattur',rank:1,sex:'M',hindex:14,citations:582,papers:95,firstPapers:28,firstCitations:113,lastPapers:10,lastCitations:3,ryMetric:3516,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'William Thorell',rank:3,sex:'M',hindex:14,citations:1108,papers:50,firstPapers:8,firstCitations:294,lastPapers:9,lastCitations:93,ryMetric:3836,firstPubYear:1998,academicAge:27,academicAgeBin:'26-30'},
+{name:'Clifford Eskey',rank:3,sex:'M',hindex:29,citations:2586,papers:66,firstPapers:12,firstCitations:466,lastPapers:7,lastCitations:166,ryMetric:6268,firstPubYear:1990,academicAge:35,academicAgeBin:'31-35'},
+{name:'Stephen Guerin',rank:1,sex:'M',hindex:10,citations:1630,papers:16,firstPapers:0,firstCitations:0,lastPapers:1,lastCitations:4,ryMetric:1846,firstPubYear:1998,academicAge:27,academicAgeBin:'26-30'},
+{name:'David Kung',rank:2,sex:'M',hindex:30,citations:2914,papers:90,firstPapers:5,firstCitations:169,lastPapers:10,lastCitations:41,ryMetric:5237,firstPubYear:2005,academicAge:20,academicAgeBin:'16-20'},
+{name:'Bryan Anthony Pukenas',rank:2,sex:'M',hindex:20,citations:1368,papers:124,firstPapers:10,firstCitations:62,lastPapers:17,lastCitations:169,ryMetric:4595,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Daniel Tonetti',rank:1,sex:'M',hindex:25,citations:1914,papers:137,firstPapers:33,firstCitations:418,lastPapers:12,lastCitations:14,ryMetric:6812,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Mohammed Ismail',rank:1,sex:'M',hindex:17,citations:1395,papers:36,firstPapers:4,firstCitations:14,lastPapers:8,lastCitations:249,ryMetric:3287,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Fernando Vinuela',rank:3,sex:'M',hindex:85,citations:29107,papers:445,firstPapers:38,firstCitations:2000,lastPapers:153,lastCitations:7711,ryMetric:78336,firstPubYear:1979,academicAge:46,academicAgeBin:'>40'},
+{name:'David Altschul',rank:3,sex:'M',hindex:0,citations:0,papers:1,firstPapers:1,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:50,firstPubYear:2017,academicAge:8,academicAgeBin:'6-10'},
+{name:'Jacob Baranoski',rank:1,sex:'M',hindex:26,citations:2565,papers:142,firstPapers:21,firstCitations:216,lastPapers:0,lastCitations:0,ryMetric:5689,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Donnie Bell',rank:1,sex:'M',hindex:2,citations:96,papers:2,firstPapers:1,firstCitations:19,lastPapers:0,lastCitations:0,ryMetric:232,firstPubYear:2020,academicAge:5,academicAgeBin:'0-5'},
+{name:'Alejandro Berenstein',rank:3,sex:'M',hindex:55,citations:10805,papers:273,firstPapers:42,firstCitations:1155,lastPapers:119,lastCitations:3437,ryMetric:38343,firstPubYear:1978,academicAge:47,academicAgeBin:'>40'},
+{name:'Arani Bose',rank:null,sex:'M',hindex:10,citations:1151,papers:13,firstPapers:3,firstCitations:724,lastPapers:3,lastCitations:100,ryMetric:4817,firstPubYear:1996,academicAge:29,academicAgeBin:'26-30'},
+{name:'Allan Brook',rank:3,sex:'M',hindex:1,citations:46,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:56,firstPubYear:2020,academicAge:5,academicAgeBin:'0-5'},
+{name:'M. Travis Caton',rank:1,sex:'M',hindex:12,citations:466,papers:60,firstPapers:28,firstCitations:161,lastPapers:4,lastCitations:0,ryMetric:2990,firstPubYear:2018,academicAge:7,academicAgeBin:'6-10'},
+{name:'Charlotte Chung',rank:1,sex:'F',hindex:1,citations:22,papers:1,firstPapers:1,firstCitations:22,lastPapers:0,lastCitations:0,ryMetric:160,firstPubYear:2015,academicAge:10,academicAgeBin:'6-10'},
+{name:'John Dalfino',rank:1,sex:'M',hindex:12,citations:451,papers:51,firstPapers:5,firstCitations:45,lastPapers:10,lastCitations:77,ryMetric:2049,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Reza Dashti',rank:2,sex:'M',hindex:29,citations:2813,papers:119,firstPapers:26,firstCitations:609,lastPapers:8,lastCitations:23,ryMetric:7891,firstPubYear:1997,academicAge:28,academicAgeBin:'26-30'},
+{name:'Reade De Leacy',rank:2,sex:'M',hindex:27,citations:4646,papers:175,firstPapers:17,firstCitations:193,lastPapers:20,lastCitations:237,ryMetric:9596,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'Nicholas Field',rank:1,sex:'M',hindex:9,citations:211,papers:35,firstPapers:7,firstCitations:71,lastPapers:0,lastCitations:0,ryMetric:1125,firstPubYear:2019,academicAge:6,academicAgeBin:'6-10'},
+{name:'Johanna Fifi',rank:3,sex:'F',hindex:37,citations:6772,papers:210,firstPapers:10,firstCitations:515,lastPapers:31,lastCitations:2124,ryMetric:20858,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'David Fiorella',rank:3,sex:'M',hindex:73,citations:23375,papers:371,firstPapers:89,firstCitations:5203,lastPapers:58,lastCitations:3677,ryMetric:68485,firstPubYear:1993,academicAge:32,academicAgeBin:'31-35'},
+{name:'Y. Pierre Gobin',rank:3,sex:'M',hindex:67,citations:19401,papers:247,firstPapers:29,firstCitations:1976,lastPapers:60,lastCitations:3620,ryMetric:46110,firstPubYear:1991,academicAge:34,academicAgeBin:'31-35'},
+{name:'Gaurav Gupta',rank:3,sex:'M',hindex:6,citations:108,papers:19,firstPapers:5,firstCitations:7,lastPapers:1,lastCitations:5,ryMetric:586,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Neil Haranhalli',rank:2,sex:'M',hindex:13,citations:745,papers:78,firstPapers:8,firstCitations:108,lastPapers:6,lastCitations:132,ryMetric:3045,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Haydn Hoffman',rank:1,sex:'M',hindex:14,citations:0,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:0,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Richard Jung',rank:1,sex:'M',hindex:2,citations:29,papers:2,firstPapers:0,firstCitations:0,lastPapers:1,lastCitations:17,ryMetric:157,firstPubYear:1975,academicAge:50,academicAgeBin:'>40'},
+{name:'Christopher Paul Kellner',rank:2,sex:'M',hindex:40,citations:6638,papers:253,firstPapers:26,firstCitations:547,lastPapers:65,lastCitations:884,ryMetric:18532,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Jared Knopman',rank:2,sex:'M',hindex:26,citations:2260,papers:101,firstPapers:9,firstCitations:95,lastPapers:19,lastCitations:541,ryMetric:6796,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Rosalind Lai',rank:1,sex:'F',hindex:19,citations:954,papers:90,firstPapers:29,firstCitations:303,lastPapers:0,lastCitations:0,ryMetric:4226,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Sean Lavine',rank:3,sex:'M',hindex:36,citations:4813,papers:147,firstPapers:40,firstCitations:716,lastPapers:27,lastCitations:544,ryMetric:14003,firstPubYear:1991,academicAge:34,academicAgeBin:'31-35'},
+{name:'Seon-Kyu Lee',rank:3,sex:'M',hindex:31,citations:3130,papers:85,firstPapers:12,firstCitations:279,lastPapers:14,lastCitations:78,ryMetric:6448,firstPubYear:1993,academicAge:32,academicAgeBin:'31-35'},
+{name:'Elad Levy',rank:3,sex:'M',hindex:0,citations:0,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:10,firstPubYear:2020,academicAge:5,academicAgeBin:'0-5'},
+{name:'Thomas Link',rank:1,sex:'M',hindex:13,citations:915,papers:46,firstPapers:11,firstCitations:525,lastPapers:2,lastCitations:1,ryMetric:3999,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Shahram Majidi',rank:2,sex:'M',hindex:22,citations:3045,papers:95,firstPapers:19,firstCitations:360,lastPapers:21,lastCitations:158,ryMetric:7667,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Grace Mandigo',rank:1,sex:'F',hindex:4,citations:165,papers:7,firstPapers:0,firstCitations:0,lastPapers:2,lastCitations:1,ryMetric:319,firstPubYear:2020,academicAge:5,academicAgeBin:'0-5'},
+{name:'Thomas Mattingly',rank:2,sex:'M',hindex:10,citations:341,papers:55,firstPapers:15,firstCitations:108,lastPapers:7,lastCitations:10,ryMetric:2227,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'J Mocco',rank:3,sex:'M',hindex:76,citations:27245,papers:687,firstPapers:57,firstCitations:1946,lastPapers:197,lastCitations:4639,ryMetric:70575,firstPubYear:1998,academicAge:27,academicAgeBin:'26-30'},
+{name:'Thomas James Oxley',rank:1,sex:'M',hindex:28,citations:10399,papers:83,firstPapers:10,firstCitations:2244,lastPapers:19,lastCitations:419,ryMetric:22305,firstPubYear:2003,academicAge:22,academicAgeBin:'21-25'},
+{name:'Athos Patsalides',rank:2,sex:'M',hindex:32,citations:3163,papers:154,firstPapers:18,firstCitations:498,lastPapers:58,lastCitations:1157,ryMetric:14363,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Alexandra Paul',rank:2,sex:'F',hindex:12,citations:982,papers:69,firstPapers:5,firstCitations:62,lastPapers:22,lastCitations:90,ryMetric:3360,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Howard Riina',rank:3,sex:'M',hindex:45,citations:6366,papers:242,firstPapers:26,firstCitations:215,lastPapers:39,lastCitations:566,ryMetric:14235,firstPubYear:1991,academicAge:34,academicAgeBin:'31-35'},
+{name:'Caleb Rutledge',rank:1,sex:'M',hindex:23,citations:1938,papers:128,firstPapers:22,firstCitations:392,lastPapers:0,lastCitations:0,ryMetric:5666,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Maksim Shapiro',rank:3,sex:'M',hindex:32,citations:3731,papers:144,firstPapers:26,firstCitations:1167,lastPapers:11,lastCitations:61,ryMetric:11563,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Tomoyoshi Shigematsu',rank:1,sex:'M',hindex:14,citations:2202,papers:55,firstPapers:5,firstCitations:94,lastPapers:9,lastCitations:15,ryMetric:3748,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Hazem Shoirah',rank:2,sex:'M',hindex:14,citations:2347,papers:42,firstPapers:5,firstCitations:99,lastPapers:6,lastCitations:20,ryMetric:3683,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Adnan Hussain Siddiqui',rank:3,sex:'M',hindex:82,citations:36701,papers:913,firstPapers:21,firstCitations:641,lastPapers:207,lastCitations:4409,ryMetric:74527,firstPubYear:2005,academicAge:20,academicAgeBin:'16-20'},
+{name:'Kenneth Snyder',rank:2,sex:'M',hindex:45,citations:7522,papers:281,firstPapers:6,firstCitations:72,lastPapers:11,lastCitations:71,ryMetric:11004,firstPubYear:1999,academicAge:26,academicAgeBin:'26-30'},
+{name:'Qingliang Tony Wang',rank:2,sex:'M',hindex:3,citations:64,papers:4,firstPapers:0,firstCitations:0,lastPapers:1,lastCitations:21,ryMetric:228,firstPubYear:2021,academicAge:4,academicAgeBin:'0-5'},
+{name:'Henry Woo',rank:3,sex:'M',hindex:48,citations:10011,papers:155,firstPapers:8,firstCitations:44,lastPapers:25,lastCitations:276,ryMetric:13886,firstPubYear:1996,academicAge:29,academicAgeBin:'26-30'},
+{name:'Junichi Yamamoto',rank:1,sex:'M',hindex:12,citations:888,papers:33,firstPapers:9,firstCitations:5,lastPapers:3,lastCitations:8,ryMetric:1750,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Richard Zampolin',rank:2,sex:'M',hindex:11,citations:393,papers:29,firstPapers:2,firstCitations:20,lastPapers:5,lastCitations:38,ryMetric:1195,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Stavropoula Tjoumakaris',rank:3,sex:'F',hindex:54,citations:12003,papers:502,firstPapers:12,firstCitations:132,lastPapers:62,lastCitations:1423,ryMetric:26156,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Richard Williamson',rank:1,sex:'M',hindex:18,citations:998,papers:80,firstPapers:6,firstCitations:102,lastPapers:5,lastCitations:8,ryMetric:2678,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Mahesh Jayaraman',rank:3,sex:'M',hindex:1,citations:13,papers:2,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:33,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Krisztina Moldovan',rank:1,sex:'F',hindex:3,citations:171,papers:3,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:201,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Elias Shaaya',rank:null,sex:'M',hindex:11,citations:288,papers:33,firstPapers:2,firstCitations:6,lastPapers:0,lastCitations:0,ryMetric:722,firstPubYear:2019,academicAge:6,academicAgeBin:'6-10'},
+{name:'Radmehr Torabi',rank:2,sex:'M',hindex:5,citations:192,papers:30,firstPapers:1,firstCitations:2,lastPapers:3,lastCitations:8,ryMetric:692,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'Dylan Wolman',rank:1,sex:'M',hindex:11,citations:521,papers:44,firstPapers:12,firstCitations:102,lastPapers:5,lastCitations:2,ryMetric:2057,firstPubYear:2016,academicAge:9,academicAgeBin:'6-10'},
+{name:'Imran Chaudry',rank:3,sex:'M',hindex:26,citations:2340,papers:58,firstPapers:1,firstCitations:2,lastPapers:12,lastCitations:899,ryMetric:7044,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Cole Blease Graham',rank:null,sex:'M',hindex:1,citations:6,papers:8,firstPapers:6,firstCitations:5,lastPapers:2,lastCitations:1,ryMetric:430,firstPubYear:1985,academicAge:40,academicAgeBin:'36-40'},
+{name:'Roham Moftakhar',rank:2,sex:'M',hindex:20,citations:2104,papers:56,firstPapers:9,firstCitations:211,lastPapers:8,lastCitations:51,ryMetric:3812,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Alejandro Spiotta',rank:3,sex:'M',hindex:52,citations:9750,papers:419,firstPapers:72,firstCitations:1812,lastPapers:116,lastCitations:1914,ryMetric:36209,firstPubYear:2005,academicAge:20,academicAgeBin:'16-20'},
+{name:'Aquilla Turk',rank:3,sex:'M',hindex:53,citations:9296,papers:203,firstPapers:33,firstCitations:2114,lastPapers:38,lastCitations:1243,ryMetric:26997,firstPubYear:1999,academicAge:26,academicAgeBin:'26-30'},
+{name:'Jan Vargas',rank:null,sex:'M',hindex:1,citations:54,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:64,firstPubYear:2020,academicAge:5,academicAgeBin:'0-5'},
+{name:'Adam Arthur',rank:3,sex:'M',hindex:52,citations:8873,papers:346,firstPapers:17,firstCitations:453,lastPapers:80,lastCitations:1611,ryMetric:24452,firstPubYear:1995,academicAge:30,academicAgeBin:'26-30'},
+{name:'Blaise Baxter',rank:3,sex:'M',hindex:39,citations:18373,papers:76,firstPapers:1,firstCitations:123,lastPapers:5,lastCitations:50,ryMetric:18360,firstPubYear:1998,academicAge:27,academicAgeBin:'26-30'},
+{name:'Rohan Chitale',rank:2,sex:'M',hindex:23,citations:3008,papers:102,firstPapers:10,firstCitations:215,lastPapers:14,lastCitations:108,ryMetric:6263,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Lucas Elijovich',rank:3,sex:'M',hindex:38,citations:5125,papers:138,firstPapers:23,firstCitations:608,lastPapers:23,lastCitations:528,ryMetric:12872,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Michael Froehler',rank:2,sex:'M',hindex:39,citations:5087,papers:133,firstPapers:18,firstCitations:775,lastPapers:14,lastCitations:206,ryMetric:11604,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Matthew Fusco',rank:2,sex:'M',hindex:21,citations:1692,papers:72,firstPapers:11,firstCitations:233,lastPapers:11,lastCitations:291,ryMetric:5371,firstPubYear:2011,academicAge:14,academicAgeBin:'11-15'},
+{name:'Daniel Hoit',rank:2,sex:'M',hindex:31,citations:2940,papers:92,firstPapers:5,firstCitations:125,lastPapers:7,lastCitations:56,ryMetric:5047,firstPubYear:2003,academicAge:22,academicAgeBin:'21-25'},
+{name:'Peter Kvamme',rank:2,sex:'M',hindex:14,citations:1103,papers:27,firstPapers:1,firstCitations:1,lastPapers:2,lastCitations:19,ryMetric:1573,firstPubYear:1991,academicAge:34,academicAgeBin:'31-35'},
+{name:'Andrew Nicholson',rank:3,sex:'M',hindex:0,citations:0,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:10,firstPubYear:2025,academicAge:0,academicAgeBin:'0-5'},
+{name:'Christopher Nickele',rank:2,sex:'M',hindex:18,citations:904,papers:56,firstPapers:13,firstCitations:109,lastPapers:4,lastCitations:23,ryMetric:2655,firstPubYear:2003,academicAge:22,academicAgeBin:'21-25'},
+{name:'John Barr',rank:3,sex:'M',hindex:34,citations:6929,papers:89,firstPapers:26,firstCitations:1299,lastPapers:8,lastCitations:130,ryMetric:14895,firstPubYear:1986,academicAge:39,academicAgeBin:'36-40'},
+{name:'Lee Birnbaum',rank:3,sex:'M',hindex:16,citations:889,papers:60,firstPapers:5,firstCitations:44,lastPapers:8,lastCitations:56,ryMetric:2239,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Hormozd Bozorgchami',rank:2,sex:'M',hindex:23,citations:3847,papers:32,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:3368,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Stephen Chen',rank:3,sex:'M',hindex:17,citations:1017,papers:65,firstPapers:4,firstCitations:48,lastPapers:7,lastCitations:19,ryMetric:2375,firstPubYear:2003,academicAge:22,academicAgeBin:'21-25'},
+{name:'Peng Roc Chen',rank:3,sex:'M',hindex:28,citations:3561,papers:108,firstPapers:16,firstCitations:243,lastPapers:16,lastCitations:256,ryMetric:7917,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Karen Chen',rank:1,sex:'F',hindex:10,citations:275,papers:25,firstPapers:6,firstCitations:32,lastPapers:2,lastCitations:1,ryMetric:977,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Rafael De Oliveira Sillero',rank:1,sex:'M',hindex:8,citations:224,papers:22,firstPapers:4,firstCitations:20,lastPapers:6,lastCitations:36,ryMetric:1068,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Justin Mascitelli',rank:2,sex:'M',hindex:24,citations:2513,papers:211,firstPapers:55,firstCitations:864,lastPapers:27,lastCitations:129,ryMetric:11875,firstPubYear:2005,academicAge:20,academicAgeBin:'16-20'},
+{name:'Roberta Novakovic-White',rank:3,sex:'F',hindex:27,citations:2983,papers:52,firstPapers:4,firstCitations:113,lastPapers:2,lastCitations:118,ryMetric:4325,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'G. Lee Pride',rank:3,sex:'M',hindex:29,citations:5157,papers:58,firstPapers:6,firstCitations:145,lastPapers:2,lastCitations:1,ryMetric:6641,firstPubYear:1999,academicAge:26,academicAgeBin:'26-30'},
+{name:'Omar Tanweer',rank:2,sex:'M',hindex:26,citations:2919,papers:137,firstPapers:11,firstCitations:163,lastPapers:7,lastCitations:146,ryMetric:6245,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Babu Welch',rank:3,sex:'M',hindex:32,citations:4659,papers:120,firstPapers:17,firstCitations:11,lastPapers:21,lastCitations:1019,ryMetric:11499,firstPubYear:1997,academicAge:28,academicAgeBin:'26-30'},
+{name:'Christopher Young',rank:1,sex:'M',hindex:13,citations:482,papers:26,firstPapers:8,firstCitations:126,lastPapers:2,lastCitations:21,ryMetric:1730,firstPubYear:1989,academicAge:36,academicAgeBin:'36-40'},
+{name:'Ramesh Grandhi',rank:3,sex:'M',hindex:33,citations:4113,papers:251,firstPapers:28,firstCitations:566,lastPapers:70,lastCitations:945,ryMetric:16577,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Matthew Austin',rank:1,sex:'M',hindex:2,citations:60,papers:4,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:100,firstPubYear:2017,academicAge:8,academicAgeBin:'6-10'},
+{name:'Andrew Carlson',rank:3,sex:'M',hindex:15,citations:3314,papers:54,firstPapers:36,firstCitations:438,lastPapers:4,lastCitations:4,ryMetric:7222,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'Colin Derdeyn',rank:3,sex:'M',hindex:77,citations:29463,papers:467,firstPapers:94,firstCitations:4306,lastPapers:92,lastCitations:3262,ryMetric:71265,firstPubYear:1988,academicAge:37,academicAgeBin:'36-40'},
+{name:'Vinodh Doss',rank:1,sex:'M',hindex:10,citations:679,papers:20,firstPapers:3,firstCitations:17,lastPapers:0,lastCitations:0,ryMetric:932,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'John Entwistle',rank:1,sex:'M',hindex:9,citations:296,papers:34,firstPapers:0,firstCitations:0,lastPapers:9,lastCitations:56,ryMetric:1220,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'Avery Evans',rank:3,sex:'M',hindex:33,citations:4447,papers:78,firstPapers:13,firstCitations:1093,lastPapers:18,lastCitations:474,ryMetric:12735,firstPubYear:1987,academicAge:38,academicAgeBin:'36-40'},
+{name:'Mary Elizabeth Jensen',rank:3,sex:'F',hindex:45,citations:7328,papers:150,firstPapers:24,firstCitations:1479,lastPapers:21,lastCitations:582,ryMetric:18872,firstPubYear:1986,academicAge:39,academicAgeBin:'36-40'},
+{name:'David Loy',rank:2,sex:'M',hindex:0,citations:0,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:10,firstPubYear:2025,academicAge:0,academicAgeBin:'0-5'},
+{name:'Min Sik Park',rank:3,sex:'M',hindex:0,citations:0,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:10,firstPubYear:2025,academicAge:0,academicAgeBin:'0-5'},
+{name:'Biraj Patel',rank:2,sex:'M',hindex:9,citations:342,papers:31,firstPapers:1,firstCitations:7,lastPapers:6,lastCitations:54,ryMetric:1176,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Dennis Rivet',rank:3,sex:'M',hindex:20,citations:1223,papers:45,firstPapers:8,firstCitations:135,lastPapers:4,lastCitations:102,ryMetric:3101,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Andrew Stemer',rank:2,sex:'M',hindex:11,citations:590,papers:22,firstPapers:4,firstCitations:152,lastPapers:2,lastCitations:176,ryMetric:2362,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Katyucia de Macedo Rodrigues',rank:1,sex:'F',hindex:10,citations:316,papers:17,firstPapers:3,firstCitations:83,lastPapers:0,lastCitations:0,ryMetric:938,firstPubYear:2015,academicAge:10,academicAgeBin:'6-10'},
+{name:'David Johnson',rank:2,sex:'M',hindex:3,citations:34,papers:3,firstPapers:0,firstCitations:0,lastPapers:2,lastCitations:16,ryMetric:208,firstPubYear:1990,academicAge:35,academicAgeBin:'31-35'},
+{name:'Jason Lee Choi',rank:null,sex:'M',hindex:1,citations:7,papers:7,firstPapers:4,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:237,firstPubYear:2020,academicAge:5,academicAgeBin:'0-5'},
+{name:'Basavaraj Ghodke',rank:3,sex:'M',hindex:26,citations:2629,papers:115,firstPapers:1,firstCitations:0,lastPapers:33,lastCitations:607,ryMetric:7550,firstPubYear:1982,academicAge:43,academicAgeBin:'>40'},
+{name:'Louis Kim',rank:3,sex:'M',hindex:39,citations:6718,papers:269,firstPapers:41,firstCitations:673,lastPapers:54,lastCitations:550,ryMetric:18083,firstPubYear:1998,academicAge:27,academicAgeBin:'26-30'},
+{name:'David Robinson',rank:null,sex:'M',hindex:13,citations:1123,papers:21,firstPapers:3,firstCitations:21,lastPapers:1,lastCitations:82,ryMetric:1905,firstPubYear:1989,academicAge:36,academicAgeBin:'36-40'},
+{name:'Robert Ryan',rank:null,sex:'M',hindex:1,citations:4,papers:2,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:24,firstPubYear:2024,academicAge:1,academicAgeBin:'0-5'},
+{name:'Beverly Aagaard Kienitz',rank:3,sex:'F',hindex:32,citations:3454,papers:84,firstPapers:4,firstCitations:157,lastPapers:8,lastCitations:142,ryMetric:5970,firstPubYear:1994,academicAge:31,academicAgeBin:'31-35'},
+{name:'Azam Ahmed',rank:2,sex:'M',hindex:19,citations:1239,papers:69,firstPapers:13,firstCitations:91,lastPapers:16,lastCitations:344,ryMetric:4829,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Hirad Hedayat',rank:2,sex:'M',hindex:5,citations:183,papers:22,firstPapers:3,firstCitations:1,lastPapers:10,lastCitations:27,ryMetric:1035,firstPubYear:2015,academicAge:10,academicAgeBin:'6-10'},
+{name:'Marc Lazzaro',rank:2,sex:'M',hindex:21,citations:1607,papers:46,firstPapers:17,firstCitations:334,lastPapers:2,lastCitations:18,ryMetric:3655,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Laura McGuire',rank:1,sex:'F',hindex:12,citations:531,papers:84,firstPapers:22,firstCitations:97,lastPapers:3,lastCitations:0,ryMetric:2759,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'John Nerva',rank:1,sex:'M',hindex:16,citations:1059,papers:60,firstPapers:13,firstCitations:242,lastPapers:3,lastCitations:1,ryMetric:3271,firstPubYear:1982,academicAge:43,academicAgeBin:'>40'},
+{name:'SoHyun Boo',rank:3,sex:'F',hindex:12,citations:1291,papers:39,firstPapers:4,firstCitations:18,lastPapers:9,lastCitations:49,ryMetric:1889,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Ansaar Rai',rank:3,sex:'M',hindex:39,citations:6688,papers:186,firstPapers:39,firstCitations:995,lastPapers:17,lastCitations:71,ryMetric:14428,firstPubYear:1996,academicAge:29,academicAgeBin:'26-30'},
+{name:'Arindam Rano Chatterjee',rank:2,sex:'M',hindex:23,citations:2488,papers:80,firstPapers:6,firstCitations:25,lastPapers:6,lastCitations:57,ryMetric:4096,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Brendan Eby',rank:1,sex:'M',hindex:5,citations:674,papers:5,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:182,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Randall Edgell',rank:3,sex:'M',hindex:26,citations:2144,papers:61,firstPapers:14,firstCitations:193,lastPapers:6,lastCitations:43,ryMetric:4254,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'Christopher Moran',rank:3,sex:'M',hindex:4,citations:193,papers:9,firstPapers:4,firstCitations:30,lastPapers:1,lastCitations:0,ryMetric:603,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Alexander Norbash',rank:3,sex:'M',hindex:59,citations:14676,papers:239,firstPapers:15,firstCitations:366,lastPapers:37,lastCitations:893,ryMetric:17723,firstPubYear:1992,academicAge:33,academicAgeBin:'31-35'},
+{name:'Joshua Osbun',rank:3,sex:'M',hindex:24,citations:2009,papers:135,firstPapers:12,firstCitations:164,lastPapers:14,lastCitations:54,ryMetric:5271,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Allison Strickland',rank:1,sex:'F',hindex:9,citations:240,papers:18,firstPapers:1,firstCitations:4,lastPapers:3,lastCitations:13,ryMetric:648,firstPubYear:2015,academicAge:10,academicAgeBin:'6-10'},
+{name:'Ali Zomorodi',rank:3,sex:'M',hindex:25,citations:1843,papers:108,firstPapers:4,firstCitations:23,lastPapers:19,lastCitations:340,ryMetric:5157,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'David Hasan',rank:3,sex:'M',hindex:54,citations:10450,papers:330,firstPapers:19,firstCitations:1105,lastPapers:98,lastCitations:2362,ryMetric:32298,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Tony Smith',rank:3,sex:'M',hindex:38,citations:4934,papers:196,firstPapers:54,firstCitations:919,lastPapers:35,lastCitations:1208,ryMetric:18962,firstPubYear:1986,academicAge:39,academicAgeBin:'36-40'},
+{name:'Erik Hauck',rank:2,sex:'M',hindex:25,citations:1848,papers:81,firstPapers:36,firstCitations:724,lastPapers:18,lastCitations:113,ryMetric:8166,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Hazem Ahmed',rank:2,sex:'M',hindex:6,citations:131,papers:16,firstPapers:11,firstCitations:82,lastPapers:2,lastCitations:18,ryMetric:1211,firstPubYear:2021,academicAge:4,academicAgeBin:'0-5'},
+{name:'Andrew Cutler',rank:1,sex:'M',hindex:6,citations:259,papers:10,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:359,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'Scott Rahimi',rank:3,sex:'M',hindex:11,citations:447,papers:39,firstPapers:10,firstCitations:256,lastPapers:16,lastCitations:77,ryMetric:3209,firstPubYear:2003,academicAge:22,academicAgeBin:'21-25'},
+{name:'Dan-Victor Giurgiutiu',rank:2,sex:'M',hindex:11,citations:897,papers:28,firstPapers:2,firstCitations:52,lastPapers:2,lastCitations:2,ryMetric:973,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Abhishek Singh',rank:1,sex:'M',hindex:1,citations:108,papers:2,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:10,firstPubYear:2021,academicAge:4,academicAgeBin:'0-5'},
+{name:'John Agola',rank:1,sex:'M',hindex:3,citations:86,papers:4,firstPapers:0,firstCitations:0,lastPapers:2,lastCitations:10,ryMetric:246,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Hugo Cuellar',rank:3,sex:'M',hindex:15,citations:588,papers:53,firstPapers:0,firstCitations:0,lastPapers:5,lastCitations:14,ryMetric:1374,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Philippe Gailloud',rank:2,sex:'M',hindex:47,citations:7630,papers:304,firstPapers:66,firstCitations:990,lastPapers:103,lastCitations:1997,ryMetric:29378,firstPubYear:1994,academicAge:31,academicAgeBin:'31-35'},
+{name:'Adeel Saleemi',rank:3,sex:'M',hindex:0,citations:0,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:10,firstPubYear:2025,academicAge:0,academicAgeBin:'0-5'},
+{name:'Peter Sunenshine',rank:1,sex:'M',hindex:13,citations:1113,papers:17,firstPapers:0,firstCitations:0,lastPapers:2,lastCitations:14,ryMetric:1312,firstPubYear:2016,academicAge:9,academicAgeBin:'6-10'},
+{name:'Geoffrey Colby',rank:3,sex:'M',hindex:1,citations:3,papers:1,firstPapers:1,firstCitations:3,lastPapers:0,lastCitations:0,ryMetric:65,firstPubYear:1956,academicAge:69,academicAgeBin:'>40'},
+{name:'Ennis Jesus Duffis',rank:1,sex:'M',hindex:11,citations:434,papers:18,firstPapers:6,firstCitations:211,lastPapers:0,lastCitations:0,ryMetric:1698,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Emanuele Orru',rank:1,sex:'M',hindex:15,citations:796,papers:44,firstPapers:17,firstCitations:197,lastPapers:3,lastCitations:5,ryMetric:2844,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Robert Ecker',rank:3,sex:'M',hindex:25,citations:3345,papers:80,firstPapers:42,firstCitations:675,lastPapers:5,lastCitations:112,ryMetric:8593,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Susan Williams',rank:1,sex:'F',hindex:25,citations:1792,papers:78,firstPapers:12,firstCitations:152,lastPapers:9,lastCitations:201,ryMetric:4824,firstPubYear:1996,academicAge:29,academicAgeBin:'26-30'},
+{name:'Adam Wallace',rank:1,sex:'M',hindex:19,citations:3833,papers:38,firstPapers:9,firstCitations:694,lastPapers:1,lastCitations:17,ryMetric:7457,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Ghasan Ahmad',rank:1,sex:'M',hindex:5,citations:127,papers:7,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:197,firstPubYear:2014,academicAge:11,academicAgeBin:'11-15'},
+{name:'Chirag Gandhi',rank:3,sex:'M',hindex:39,citations:5421,papers:304,firstPapers:15,firstCitations:276,lastPapers:60,lastCitations:1290,ryMetric:17725,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Esteban Cheng-Ching',rank:1,sex:'M',hindex:13,citations:1001,papers:25,firstPapers:5,firstCitations:148,lastPapers:2,lastCitations:4,ryMetric:1559,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Jeffrey Sunshine',rank:3,sex:'M',hindex:35,citations:6592,papers:102,firstPapers:7,firstCitations:385,lastPapers:22,lastCitations:1617,ryMetric:16780,firstPubYear:1986,academicAge:39,academicAgeBin:'36-40'},
+{name:'Spiros Lee Blackburn',rank:2,sex:'M',hindex:31,citations:3472,papers:144,firstPapers:16,firstCitations:330,lastPapers:21,lastCitations:202,ryMetric:8520,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Saif Bushnaq',rank:1,sex:'M',hindex:6,citations:282,papers:16,firstPapers:4,firstCitations:29,lastPapers:3,lastCitations:8,ryMetric:826,firstPubYear:2018,academicAge:7,academicAgeBin:'6-10'},
+{name:'Ali Fadhil',rank:1,sex:'M',hindex:2,citations:24,papers:2,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:44,firstPubYear:2024,academicAge:1,academicAgeBin:'0-5'},
+{name:'Peter Kan',rank:3,sex:'M',hindex:1,citations:8,papers:1,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:18,firstPubYear:2025,academicAge:0,academicAgeBin:'0-5'},
+{name:'Alberto Maud',rank:3,sex:'M',hindex:13,citations:550,papers:49,firstPapers:9,firstCitations:101,lastPapers:7,lastCitations:62,ryMetric:2332,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Gustavo Jose Rodriguez',rank:3,sex:'M',hindex:19,citations:1221,papers:90,firstPapers:8,firstCitations:139,lastPapers:14,lastCitations:51,ryMetric:3761,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Faheem Sheriff',rank:1,sex:'M',hindex:12,citations:375,papers:33,firstPapers:14,firstCitations:192,lastPapers:1,lastCitations:4,ryMetric:2089,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Scott Bruce Raymond',rank:null,sex:'M',hindex:17,citations:2541,papers:52,firstPapers:20,firstCitations:685,lastPapers:1,lastCitations:2,ryMetric:6649,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'},
+{name:'Daniel Walter Zumofen',rank:3,sex:'M',hindex:23,citations:1499,papers:56,firstPapers:8,firstCitations:218,lastPapers:7,lastCitations:154,ryMetric:4147,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Shamsher Singh Dalal',rank:2,sex:'M',hindex:12,citations:417,papers:31,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:727,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Merritt Weaver Brown',rank:1,sex:'M',hindex:12,citations:1047,papers:19,firstPapers:4,firstCitations:78,lastPapers:0,lastCitations:0,ryMetric:1167,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Randy Scott Bell',rank:3,sex:'M',hindex:23,citations:2076,papers:88,firstPapers:14,firstCitations:510,lastPapers:21,lastCitations:144,ryMetric:6972,firstPubYear:2002,academicAge:23,academicAgeBin:'21-25'},
+{name:'Martin Geza Radvany',rank:3,sex:'M',hindex:15,citations:1117,papers:73,firstPapers:24,firstCitations:277,lastPapers:13,lastCitations:85,ryMetric:4775,firstPubYear:1991,academicAge:34,academicAgeBin:'31-35'},
+{name:'Ajay Kumar Wakhloo',rank:3,sex:'M',hindex:60,citations:11463,papers:287,firstPapers:29,firstCitations:1396,lastPapers:91,lastCitations:2854,ryMetric:35361,firstPubYear:1990,academicAge:35,academicAgeBin:'31-35'},
+{name:'Daniel Lee Surdell',rank:3,sex:'M',hindex:15,citations:696,papers:81,firstPapers:29,firstCitations:126,lastPapers:17,lastCitations:143,ryMetric:4422,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'Mark Bain',rank:3,sex:'M',hindex:22,citations:2412,papers:126,firstPapers:7,firstCitations:59,lastPapers:35,lastCitations:251,ryMetric:6012,firstPubYear:2008,academicAge:17,academicAgeBin:'16-20'},
+{name:'Nicholas Bambakidis',rank:3,sex:'M',hindex:38,citations:14554,papers:184,firstPapers:48,firstCitations:1332,lastPapers:73,lastCitations:1077,ryMetric:30870,firstPubYear:1999,academicAge:26,academicAgeBin:'26-30'},
+{name:'Shazam Hussain',rank:3,sex:'M',hindex:47,citations:7898,papers:217,firstPapers:19,firstCitations:193,lastPapers:34,lastCitations:839,ryMetric:16092,firstPubYear:1997,academicAge:28,academicAgeBin:'26-30'},
+{name:'Charles Prestigiacomo',rank:3,sex:'M',hindex:43,citations:5606,papers:286,firstPapers:71,firstCitations:492,lastPapers:87,lastCitations:1335,ryMetric:22094,firstPubYear:1991,academicAge:34,academicAgeBin:'31-35'},
+{name:'Peter Rasmussen',rank:3,sex:'M',hindex:47,citations:7090,papers:198,firstPapers:25,firstCitations:247,lastPapers:43,lastCitations:1196,ryMetric:17287,firstPubYear:1994,academicAge:31,academicAgeBin:'31-35'},
+{name:'Jenny Tsai',rank:3,sex:'F',hindex:18,citations:5768,papers:43,firstPapers:8,firstCitations:131,lastPapers:1,lastCitations:3,ryMetric:6933,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Gary Nesbit',rank:3,sex:'M',hindex:41,citations:7807,papers:118,firstPapers:11,firstCitations:714,lastPapers:14,lastCitations:333,ryMetric:13595,firstPubYear:1988,academicAge:37,academicAgeBin:'36-40'},
+{name:'Robert Hurst',rank:3,sex:'M',hindex:38,citations:6863,papers:177,firstPapers:35,firstCitations:1204,lastPapers:44,lastCitations:613,ryMetric:17339,firstPubYear:1987,academicAge:38,academicAgeBin:'36-40'},
+{name:'Pascal Jabbour',rank:3,sex:'M',hindex:71,citations:21511,papers:822,firstPapers:32,firstCitations:627,lastPapers:297,lastCitations:5765,ryMetric:68285,firstPubYear:2001,academicAge:24,academicAgeBin:'21-25'},
+{name:'Robert Koenigsberg',rank:3,sex:'M',hindex:17,citations:1050,papers:64,firstPapers:31,firstCitations:412,lastPapers:4,lastCitations:135,ryMetric:5278,firstPubYear:1993,academicAge:32,academicAgeBin:'31-35'},
+{name:'Robert Rosenwasser',rank:3,sex:'M',hindex:76,citations:34007,papers:735,firstPapers:144,firstCitations:629,lastPapers:90,lastCitations:3336,ryMetric:58053,firstPubYear:1981,academicAge:44,academicAgeBin:'>40'},
+{name:'Clemens Schirmer',rank:3,sex:'M',hindex:38,citations:6525,papers:260,firstPapers:50,firstCitations:1267,lastPapers:33,lastCitations:248,ryMetric:18505,firstPubYear:2000,academicAge:25,academicAgeBin:'21-25'},
+{name:'Scott Simon',rank:3,sex:'M',hindex:15,citations:686,papers:64,firstPapers:15,firstCitations:201,lastPapers:8,lastCitations:90,ryMetric:3410,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'John Reavey-Cantwell',rank:3,sex:'M',hindex:21,citations:1538,papers:54,firstPapers:8,firstCitations:123,lastPapers:20,lastCitations:347,ryMetric:5078,firstPubYear:1997,academicAge:28,academicAgeBin:'26-30'},
+{name:'Thabele Leslie-Mazwi',rank:3,sex:'M',hindex:39,citations:19897,papers:200,firstPapers:29,firstCitations:493,lastPapers:29,lastCitations:578,ryMetric:28501,firstPubYear:2006,academicAge:19,academicAgeBin:'16-20'},
+{name:'Michael Levitt',rank:3,sex:'M',hindex:35,citations:5054,papers:354,firstPapers:42,firstCitations:649,lastPapers:57,lastCitations:408,ryMetric:16749,firstPubYear:2007,academicAge:18,academicAgeBin:'16-20'},
+{name:'Michael Abraham',rank:3,sex:'M',hindex:31,citations:8837,papers:100,firstPapers:2,firstCitations:0,lastPapers:14,lastCitations:84,ryMetric:10661,firstPubYear:2010,academicAge:15,academicAgeBin:'11-15'},
+{name:'Maureen Anne Darwal',rank:1,sex:'F',hindex:1,citations:5,papers:5,firstPapers:4,firstCitations:1,lastPapers:0,lastCitations:0,ryMetric:219,firstPubYear:2013,academicAge:12,academicAgeBin:'11-15'},
+{name:'Hekmat Khodr Zarzour',rank:2,sex:'M',hindex:17,citations:1040,papers:70,firstPapers:1,firstCitations:1,lastPapers:3,lastCitations:9,ryMetric:1940,firstPubYear:2009,academicAge:16,academicAgeBin:'16-20'},
+{name:'Michael Reid Gooch',rank:2,sex:'M',hindex:24,citations:2312,papers:213,firstPapers:2,firstCitations:0,lastPapers:11,lastCitations:245,ryMetric:5942,firstPubYear:2012,academicAge:13,academicAgeBin:'11-15'},
+{name:'Larami MacKenzie',rank:null,sex:'F',hindex:15,citations:1973,papers:25,firstPapers:2,firstCitations:0,lastPapers:1,lastCitations:5,ryMetric:1103,firstPubYear:1997,academicAge:28,academicAgeBin:'26-30'},
+{name:'Sumeet Singh Multani',rank:1,sex:'M',hindex:3,citations:260,papers:6,firstPapers:0,firstCitations:0,lastPapers:0,lastCitations:0,ryMetric:32,firstPubYear:2021,academicAge:4,academicAgeBin:'0-5'},
+{name:'Preethi Ramchand',rank:1,sex:'F',hindex:7,citations:302,papers:17,firstPapers:5,firstCitations:71,lastPapers:0,lastCitations:0,ryMetric:956,firstPubYear:2015,academicAge:10,academicAgeBin:'6-10'},
+{name:'Michelle Smith',rank:2,sex:'F',hindex:16,citations:1254,papers:30,firstPapers:5,firstCitations:384,lastPapers:3,lastCitations:68,ryMetric:3665,firstPubYear:2004,academicAge:21,academicAgeBin:'21-25'}];
+    </script>
+</body>
+</html>
