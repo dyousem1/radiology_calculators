@@ -29,7 +29,7 @@ Compare your scholarly metrics against peers in your radiology subspecialty. Eac
 | ❤️ Cardiothoracic Imaging | 585 | 86 | ✅ Live |
 | 🫀 Body Imaging Combined | 2,037 | 104 | ✅ Live |
 
-**Total: 7,282 Faculty across 122 Academic Medical Centers**
+**Total: 7,282 Faculty across 127 Academic Medical Centers**
 
 ---
 
