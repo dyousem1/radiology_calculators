@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radiology Percentile Calculators</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+
+        .author {
+            font-size: 1em;
+            color: #888;
+        }
+
+        .description {
+            max-width: 800px;
+            margin: 30px auto;
+            text-align: center;
+            line-height: 1.7;
+            color: #c0c0c0;
+            font-size: 1.1em;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.8em;
+            margin: 50px 0 30px;
+            color: #00d4ff;
+        }
+
+        .specialty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .specialty-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .specialty-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Individual specialty colors */
+        .neuro { border-color: #9b59b6; }
+        .neuro:hover { box-shadow: 0 20px 40px rgba(155, 89, 182, 0.3); }
+        .neuro .icon { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+
+        .neuroir { border-color: #8e44ad; }
+        .neuroir:hover { box-shadow: 0 20px 40px rgba(142, 68, 173, 0.3); }
+        .neuroir .icon { background: linear-gradient(135deg, #8e44ad, #7d3c98); }
+
+        .msk { border-color: #27ae60; }
+        .msk:hover { box-shadow: 0 20px 40px rgba(39, 174, 96, 0.3); }
+        .msk .icon { background: linear-gradient(135deg, #27ae60, #1e8449); }
+
+        .breast { border-color: #e84393; }
+        .breast:hover { box-shadow: 0 20px 40px rgba(232, 67, 147, 0.3); }
+        .breast .icon { background: linear-gradient(135deg, #e84393, #c0392b); }
+
+        .nuclear { border-color: #a0522d; }
+        .nuclear:hover { box-shadow: 0 20px 40px rgba(160, 82, 45, 0.3); }
+        .nuclear .icon { background: linear-gradient(135deg, #a0522d, #8b4513); }
+
+        .pediatric { border-color: #3498db; }
+        .pediatric:hover { box-shadow: 0 20px 40px rgba(52, 152, 219, 0.3); }
+        .pediatric .icon { background: linear-gradient(135deg, #3498db, #2980b9); }
+
+        .abdominal { border-color: #e67e22; }
+        .abdominal:hover { box-shadow: 0 20px 40px rgba(230, 126, 34, 0.3); }
+        .abdominal .icon { background: linear-gradient(135deg, #e67e22, #d35400); }
+
+        .cardiothoracic { border-color: #e74c3c; }
+        .cardiothoracic:hover { box-shadow: 0 20px 40px rgba(231, 76, 60, 0.3); }
+        .cardiothoracic .icon { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+        .ir { border-color: #1abc9c; }
+        .ir:hover { box-shadow: 0 20px 40px rgba(26, 188, 156, 0.3); }
+        .ir .icon { background: linear-gradient(135deg, #1abc9c, #16a085); }
+
+        .body { border-color: #1e40af; }
+        .body:hover { box-shadow: 0 20px 40px rgba(30, 64, 175, 0.3); }
+        .body .icon { background: linear-gradient(135deg, #1e40af, #1e3a8a); }
+
+        .emergency { border-color: #6b21a8; }
+        .emergency:hover { box-shadow: 0 20px 40px rgba(107, 33, 168, 0.3); }
+        .emergency .icon { background: linear-gradient(135deg, #6b21a8, #581c87); }
+
+        
+
+        .institution { border-color: #f39c12; }
+        .institution:hover { box-shadow: 0 20px 40px rgba(243, 156, 18, 0.3); }
+        .institution .icon { background: linear-gradient(135deg, #f39c12, #d68910); }
+
+        .top25 { border-color: #fbbf24; }
+        .top25:hover { box-shadow: 0 20px 40px rgba(251, 191, 36, 0.3); }
+        .top25 .icon { background: linear-gradient(135deg, #fbbf24, #d97706); }
+
+        .icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+
+        .specialty-card h2 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+        }
+
+        .specialty-card .faculty-count {
+            color: #888;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+
+        .specialty-card .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status.live {
+            background: rgba(39, 174, 96, 0.2);
+            color: #2ecc71;
+        }
+
+        .status.new {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+
+        .status.updated {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+        }
+
+        .status.coming {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
+        .specialty-card.disabled {
+            cursor: default;
+            opacity: 0.6;
+        }
+
+        .specialty-card.disabled:hover {
+            transform: none;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #888;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+        }
+
+        .metric-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .metric-info h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .metric-info p {
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        .metric-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            color: #00d4ff;
+        }
+
+        .tools-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .specialty-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Radiology Percentile Calculators</h1>
+            <p class="subtitle">Academic Productivity Benchmarking by Subspecialty</p>
+            <p class="author">David M. Yousem, MD, MBA | Johns Hopkins University</p>
+        </header>
+
+        <p class="description">
+            Compare your scholarly metrics against peers in your radiology subspecialty. 
+            Each calculator provides percentile rankings based on comprehensive Scopus bibliometric data, 
+            with filtering by academic rank, sex, and years since first publication.
+        </p>
+
+        <div class="specialty-grid">
+            <!-- Live Calculators -->
+            <a href="Neuroradiology_Percentile_Calculator.html" class="specialty-card neuro">
+                <div class="icon">🧠</div>
+                <h2>Neuroradiology</h2>
+                <p class="faculty-count">903 Faculty • 100 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="Neurointerventional_Radiology_Percentile_Calculator.html" class="specialty-card neuroir">
+                <div class="icon">💉</div>
+                <h2>Neurointerventional Radiology</h2>
+                <p class="faculty-count">333 Faculty • 128 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="MSK_Percentile_Calculator.html" class="specialty-card msk">
+                <div class="icon">🦴</div>
+                <h2>MSK Radiology</h2>
+                <p class="faculty-count">673 Faculty • 93 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="Breast_Imaging_Percentile_Calculator.html" class="specialty-card breast">
+                <div class="icon">🎗️</div>
+                <h2>Breast Imaging</h2>
+                <p class="faculty-count">969 Faculty • 107 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="Nuclear_Medicine_Percentile_Calculator.html" class="specialty-card nuclear">
+                <div class="icon">☢️</div>
+                <h2>Nuclear Medicine</h2>
+                <p class="faculty-count">514 Faculty • 102 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="Pediatric_Radiology_Percentile_Calculator.html" class="specialty-card pediatric">
+                <div class="icon">👶</div>
+                <h2>Pediatric Radiology</h2>
+                <p class="faculty-count">975 Faculty • 97 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="Interventional_Radiology_Percentile_Calculator.html" class="specialty-card ir">
+                <div class="icon">🩺</div>
+                <h2>Interventional Radiology</h2>
+                <p class="faculty-count">878 Faculty • 102 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="Abdominal_Imaging_Percentile_Calculator.html" class="specialty-card abdominal">
+                <div class="icon">🔬</div>
+                <h2>Abdominal Imaging</h2>
+                <p class="faculty-count">1,452 Faculty • 103 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="Cardiothoracic_Imaging_Percentile_Calculator.html" class="specialty-card cardiothoracic">
+                <div class="icon">❤️</div>
+                <h2>Cardiothoracic Imaging</h2>
+                <p class="faculty-count">585 Faculty • 86 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="Body_Imaging_Combined_Percentile_Calculator.html" class="specialty-card body">
+                <div class="icon">🫀</div>
+                <h2>Body Imaging Combined</h2>
+                <p class="faculty-count">2,037 Faculty • 104 Institutions</p>
+                <span class="status live">● Live</span>
+            </a>
+
+            <a href="Emergency_Radiology_Percentile_Calculator.html" class="specialty-card emergency">
+                <div class="icon">🚨</div>
+                <h2>Emergency Radiology</h2>
+                <p class="faculty-count">518 Faculty • 72 Institutions</p>
+                <span class="status new">★ New</span>
+            </a>
+        </div>
+
+        <div class="tools-section">
+            <h2 class="section-title">📊 Analysis Tools</h2>
+            <div class="tools-grid">
+                <a href="Institution_Rankings_Lookup.html" class="specialty-card institution">
+                    <div class="icon">🏥</div>
+                    <h2>Institution Rankings Lookup</h2>
+                    <p class="faculty-count">127 Institutions • 12 Subspecialties • Overall View</p>
+                    <span class="status updated">✦ Updated</span>
+                </a>
+
+                <a href="Top_25_Institutions_by_Subspecialty.html" class="specialty-card top25">
+                    <div class="icon">🏆</div>
+                    <h2>Top 25 Institutions</h2>
+                    <p class="faculty-count">Rankings by Subspecialty • Overall View</p>
+                    <span class="status updated">✦ Updated</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="metric-info">
+            <h3>Featuring the RY Metric</h3>
+            <p>
+                A novel bibliometric measure that weights first and last authorship 5× more than middle authorship,
+                distinguishing research leaders from collaborative contributors.
+            </p>
+            <div class="metric-formula">
+                RY = Weighted Citations + (10 × Weighted Publications)
+            </div>
+            <p>
+                First/Last author papers weighted 5× | Middle author papers weighted 1×
+            </p>
+        </div>
+
+        <footer>
+            <p>Data sourced from Scopus bibliometric database</p>
+            <p>127 institutions harmonized (Mayo Clinic separated by campus: Rochester, Jacksonville, Phoenix)</p>
+            <p>© 2025 David M. Yousem, MD, MBA</p>
+        </footer>
+    </div>
+</body>
+</html>
