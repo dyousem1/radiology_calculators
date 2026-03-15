@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 25 Institutions by Subspecialty</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.4em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1em;
+            color: #94a3b8;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fbbf24;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        select:hover {
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+        }
+        
+        select option {
+            background: #1e293b;
+            color: white;
+        }
+        
+        .results-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .results-header {
+            background: rgba(251, 191, 36, 0.1);
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .results-header h2 {
+            color: #fbbf24;
+            font-size: 1.3em;
+        }
+        
+        .results-header .info {
+            color: #94a3b8;
+            font-size: 0.9em;
+        }
+        
+        .rankings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .rankings-table th {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 14px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .rankings-table th:first-child {
+            width: 60px;
+            text-align: center;
+        }
+        
+        .rankings-table th:last-child {
+            width: 100px;
+            text-align: right;
+        }
+        
+        .rankings-table th:nth-child(3) {
+            width: 80px;
+            text-align: center;
+        }
+        
+        .rankings-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .rankings-table tr:hover {
+            background: rgba(251, 191, 36, 0.05);
+        }
+        
+        .rankings-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .rank-cell {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        
+        .rank-1 { color: #fbbf24; }
+        .rank-2 { color: #d1d5db; }
+        .rank-3 { color: #cd7f32; }
+        
+        .institution-name {
+            font-weight: 500;
+        }
+        
+        .faculty-count {
+            text-align: center;
+            color: #fbbf24;
+            font-size: 0.9em;
+        }
+        
+        .metric-value {
+            text-align: right;
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #fbbf24;
+        }
+        
+        .top-badge {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+        
+        .badge-gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; }
+        .badge-silver { background: linear-gradient(135deg, #e5e7eb, #9ca3af); color: #000; }
+        .badge-bronze { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
+        
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        
+        .no-data .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .subspecialty-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-neuro { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .badge-msk { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .badge-breast { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+        .badge-nuclear { background: rgba(180, 83, 9, 0.2); color: #d97706; }
+        .badge-peds { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+        .badge-ir { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
+        .badge-abd { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+        .badge-ctr { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge-emergency { background: rgba(234, 88, 12, 0.2); color: #fb923c; }
+        
+        .badge-ninr {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .badge-overall {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        }
+        
+        .badge-body {
+            background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+        }
+        
+        .badge-nih {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        }
+        
+        .excluded-row td {
+            opacity: 0.5;
+            font-style: italic;
+        }
+        
+        .excluded-note {
+            font-size: 0.75em;
+            color: #ef4444;
+            display: block;
+            margin-top: 2px;
+        }
+        
+        .nih-note {
+            font-size: 0.8em;
+            color: #94a3b8;
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-style: italic;
+        }
+        
+        .metric-note {
+            font-size: 0.85em;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .all-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .metric-card h3 {
+            color: #fbbf24;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        
+        .metric-card .rankings-table {
+            font-size: 0.9em;
+        }
+        
+        .metric-card .rankings-table th,
+        .metric-card .rankings-table td {
+            padding: 6px 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #64748b;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .control-row {
+                flex-direction: column;
+            }
+            .rankings-table th, .rankings-table td {
+                padding: 12px 10px;
+            }
+            .institution-name {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Top 25 Institutions</h1>
+            <p class="subtitle">Ranked by Subspecialty and Bibliometric Metric</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label>Subspecialty</label>
+                    <select id="subspecialty-select">
+                        <option value="Overall">📊 Overall (All Subspecialties)</option>
+                        <option value="Abdominal Imaging">🫁 Abdominal Imaging</option>
+                        <option value="Body Imaging Combined">📊 Body Imaging Combined</option>
+                        <option value="Breast Imaging">🎗️ Breast Imaging</option>
+                        <option value="Cardiothoracic Imaging">❤️ Cardiothoracic Imaging</option>
+                        <option value="Emergency Radiology">🚨 Emergency Radiology</option>
+                        <option value="Interventional Radiology">🩺 Interventional Radiology</option>
+                        <option value="MSK">🦴 MSK Radiology</option>
+                        <option value="Neurointerventional">🧠 Neurointerventional</option>
+                        <option value="Neuroradiology">🧠 Neuroradiology</option>
+                        <option value="Nuclear Medicine">☢️ Nuclear Medicine</option>
+                        <option value="Pediatric Radiology">👶 Pediatric Radiology</option>
+                        <option value="NIH Funding">💰 NIH Funding (BRIMR 2025)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Metric</label>
+                    <select id="metric-select">
+                        <option value="all">── Show All Metrics ──</option>
+                        <option value="papers" selected>Total Papers</option>
+                        <option value="citations">Total Citations</option>
+                        <option value="papers_per_faculty">Papers Per Faculty</option>
+                        <option value="mean_h">Mean H-Index</option>
+                        <option value="median_h">Median H-Index</option>
+                        <option value="nih_funding">💰 NIH Funding (BRIMR 2025)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-container">
+            <div class="results-header">
+                <h2 id="results-title">Top 25 Institutions</h2>
+                <span class="info" id="results-info"></span>
+            </div>
+            <div id="results-content">
+                <div class="no-data">
+                    <div class="icon">📊</div>
+                    <p>Select a subspecialty and metric to view rankings</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Data sourced from Scopus • Minimum 3 faculty for per-faculty and H-index metrics</p>
+            <p>© 2026 David M. Yousem, MD, MBA</p>
+        </footer>
+    </div>
+
+    <script>
+    const DATA = {
+  "Neuroradiology": {
+      "total_faculty": 1040,
+      "total_institutions": 133,
+      "rankings": {
+            "papers": [
+                  ["Mayo Clinic - Rochester", 9097, 52],
+                  ["Massachusetts General Hospital (Harvard)", 3894, 49],
+                  ["University of California, San Francisco", 2515, 20],
+                  ["University of Washington", 2078, 21],
+                  ["Stanford University", 1871, 20],
+                  ["Johns Hopkins University", 1856, 15],
+                  ["Washington University in St. Louis", 1743, 17],
+                  ["University of Pennsylvania", 1689, 23],
+                  ["University of Iowa", 1418, 14],
+                  ["University of North Carolina at Chapel Hill", 1374, 12],
+                  ["University of Wisconsin", 1373, 20],
+                  ["NYU Langone Health", 1304, 22],
+                  ["Yale University", 1236, 19],
+                  ["Duke University", 1233, 14],
+                  ["Emory University", 1233, 20],
+                  ["University of Utah", 1138, 16],
+                  ["University of Michigan", 1082, 17],
+                  ["University of Texas Southwestern Medical Center", 990, 17],
+                  ["Mayo Clinic - Jacksonville", 954, 13],
+                  ["Cleveland Clinic", 918, 14],
+                  ["University of California, Los Angeles", 915, 13],
+                  ["University of California, Davis", 888, 8],
+                  ["Thomas Jefferson University", 824, 8],
+                  ["Weill Cornell Medicine", 799, 17],
+                  ["Columbia University", 769, 25]
+            ],
+            "citations": [
+                  ["Mayo Clinic - Rochester", 457191, 52],
+                  ["Massachusetts General Hospital (Harvard)", 153489, 49],
+                  ["University of California, San Francisco", 131931, 20],
+                  ["Washington University in St. Louis", 123651, 17],
+                  ["Stanford University", 83375, 20],
+                  ["University of Washington", 82312, 21],
+                  ["University of Wisconsin", 68023, 20],
+                  ["University of Pennsylvania", 66831, 23],
+                  ["University of Texas Southwestern Medical Center", 63828, 17],
+                  ["Duke University", 62496, 14],
+                  ["University of Iowa", 59447, 14],
+                  ["Johns Hopkins University", 55670, 15],
+                  ["Yale University", 49295, 19],
+                  ["NYU Langone Health", 49066, 22],
+                  ["Emory University", 39381, 20],
+                  ["University of California, Los Angeles", 38503, 13],
+                  ["Cleveland Clinic", 38280, 14],
+                  ["University of Utah", 36940, 16],
+                  ["University of North Carolina at Chapel Hill", 31794, 12],
+                  ["Thomas Jefferson University", 28917, 8],
+                  ["University of Florida", 27809, 14],
+                  ["Stony Brook University", 27149, 7],
+                  ["Brown University", 26716, 6],
+                  ["University of California, Irvine", 25614, 10],
+                  ["Weill Cornell Medicine", 24589, 17]
+            ],
+            "papers_per_faculty": [
+                  ["Mayo Clinic - Rochester", 174.9, 52],
+                  ["University of California, San Francisco", 125.8, 20],
+                  ["Johns Hopkins University", 123.7, 15],
+                  ["University of North Carolina at Chapel Hill", 114.5, 12],
+                  ["University of California, Davis", 111.0, 8],
+                  ["Thomas Jefferson University", 103.0, 8],
+                  ["Washington University in St. Louis", 102.5, 17],
+                  ["University of Iowa", 101.3, 14],
+                  ["University of Washington", 99.0, 21],
+                  ["Stanford University", 93.5, 20],
+                  ["University of Texas MD Anderson Cancer Center", 93.3, 3],
+                  ["Duke University", 88.1, 14],
+                  ["Brown University", 87.0, 6],
+                  ["National Institutes of Health", 82.3, 3],
+                  ["Massachusetts General Hospital (Harvard)", 79.5, 49],
+                  ["Icahn School of Medicine at Mount Sinai", 74.3, 9],
+                  ["University of Miami", 74.3, 10],
+                  ["University of Pennsylvania", 73.4, 23],
+                  ["Mayo Clinic - Jacksonville", 73.4, 13],
+                  ["Stony Brook University", 72.4, 7],
+                  ["University of Utah", 71.1, 16],
+                  ["University of California, Los Angeles", 70.4, 13],
+                  ["Boston University", 69.4, 9],
+                  ["University of Wisconsin", 68.7, 20],
+                  ["Cleveland Clinic", 65.6, 14]
+            ],
+            "mean_h": [
+                  ["University of California, San Francisco", 34.6, 20],
+                  ["Mayo Clinic - Rochester", 31.8, 52],
+                  ["University of Texas MD Anderson Cancer Center", 31.7, 3],
+                  ["Washington University in St. Louis", 28.1, 17],
+                  ["Brown University", 28.0, 6],
+                  ["Johns Hopkins University", 27.9, 15],
+                  ["National Institutes of Health", 27.3, 3],
+                  ["Duke University", 27.3, 14],
+                  ["University of California, Davis", 25.2, 8],
+                  ["University of Washington", 24.4, 21],
+                  ["Thomas Jefferson University", 24.2, 8],
+                  ["Stanford University", 24.2, 20],
+                  ["University of Iowa", 23.1, 14],
+                  ["Massachusetts General Hospital (Harvard)", 21.6, 49],
+                  ["Cedars-Sinai Medical Center", 21.0, 5],
+                  ["University of Utah", 20.9, 16],
+                  ["University of Pennsylvania", 20.7, 23],
+                  ["University of Texas Southwestern Medical Center", 20.6, 17],
+                  ["University of Miami", 20.6, 10],
+                  ["University of North Carolina at Chapel Hill", 20.4, 12],
+                  ["University of Wisconsin", 20.2, 20],
+                  ["University of Rochester", 20.0, 8],
+                  ["University of Louisville", 19.8, 8],
+                  ["University of California, Los Angeles", 19.7, 13],
+                  ["University of California, Irvine", 19.0, 10]
+            ],
+            "median_h": [
+                  ["University of Texas MD Anderson Cancer Center", 43.0, 3],
+                  ["University of California, San Francisco", 31.0, 20],
+                  ["Brown University", 29.0, 6],
+                  ["University of California, Davis", 27.5, 8],
+                  ["Mayo Clinic - Rochester", 25.0, 52],
+                  ["Duke University", 24.5, 14],
+                  ["University of South Florida", 22.0, 4],
+                  ["Thomas Jefferson University", 21.5, 8],
+                  ["University of Washington", 21.0, 21],
+                  ["Stanford University", 21.0, 20],
+                  ["Washington University in St. Louis", 21.0, 17],
+                  ["Johns Hopkins University", 21.0, 15],
+                  ["University of Miami", 20.5, 10],
+                  ["Cedars-Sinai Medical Center", 20.0, 5],
+                  ["University of North Carolina at Chapel Hill", 19.5, 12],
+                  ["University of Texas Southwestern Medical Center", 19.0, 17],
+                  ["University of Pennsylvania", 19.0, 23],
+                  ["Massachusetts General Hospital (Harvard)", 17.0, 49],
+                  ["University of Utah", 16.5, 16],
+                  ["University of Iowa", 16.0, 14],
+                  ["University of Rochester", 16.0, 8],
+                  ["Albert Einstein College of Medicine", 16.0, 9],
+                  ["Case Western Reserve University", 15.5, 8],
+                  ["University of Arizona", 15.0, 5],
+                  ["University of California, San Diego", 15.0, 8]
+            ]
+      }
+  },
+  "MSK": {
+      "total_faculty": 653,
+      "total_institutions": 94,
+      "rankings": {
+            "papers": [
+                  ["Mayo Clinic - Rochester", 2176, 28],
+                  ["NYU Langone Health", 1915, 36],
+                  ["University of California, San Diego", 1802, 12],
+                  ["University of California, San Francisco", 1159, 8],
+                  ["Stanford University", 1105, 12],
+                  ["Massachusetts General Hospital (Harvard)", 999, 20],
+                  ["University of Michigan", 794, 12],
+                  ["Henry Ford Health", 701, 10],
+                  ["University of Washington", 687, 11],
+                  ["University of Texas Southwestern Medical Center", 657, 10],
+                  ["Weill Cornell Medicine", 634, 8],
+                  ["Johns Hopkins University", 632, 7],
+                  ["University of Texas MD Anderson Cancer Center", 624, 7],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 556, 7],
+                  ["University of Wisconsin", 501, 12],
+                  ["Cleveland Clinic", 471, 14],
+                  ["University of Pennsylvania", 447, 15],
+                  ["University of California, Irvine", 433, 7],
+                  ["Penn State College of Medicine", 401, 7],
+                  ["University of Maryland", 390, 6],
+                  ["University of Iowa", 377, 9],
+                  ["Brigham and Women's Hospital (Harvard)", 373, 9],
+                  ["Duke University", 354, 9],
+                  ["University of Miami", 331, 5],
+                  ["University of Virginia", 314, 10]
+            ],
+            "citations": [
+                  ["University of California, San Diego", 63223, 12],
+                  ["Mayo Clinic - Rochester", 61479, 28],
+                  ["NYU Langone Health", 57649, 36],
+                  ["Stanford University", 49126, 12],
+                  ["University of California, San Francisco", 47050, 8],
+                  ["Henry Ford Health", 31942, 10],
+                  ["Massachusetts General Hospital (Harvard)", 30741, 20],
+                  ["University of Michigan", 30304, 12],
+                  ["Weill Cornell Medicine", 20543, 8],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 17378, 7],
+                  ["University of Texas MD Anderson Cancer Center", 16979, 7],
+                  ["University of Pennsylvania", 16721, 15],
+                  ["Johns Hopkins University", 16206, 7],
+                  ["Duke University", 14159, 9],
+                  ["University of Wisconsin", 13678, 12],
+                  ["Cleveland Clinic", 12507, 14],
+                  ["University of Washington", 12384, 11],
+                  ["Penn State College of Medicine", 12295, 7],
+                  ["University of Texas Southwestern Medical Center", 11667, 10],
+                  ["Thomas Jefferson University", 11112, 3],
+                  ["University of North Carolina at Chapel Hill", 10610, 8],
+                  ["University of Iowa", 10370, 9],
+                  ["Brigham and Women's Hospital (Harvard)", 10003, 9],
+                  ["University of Minnesota", 9545, 4],
+                  ["University of California, Irvine", 8555, 7]
+            ],
+            "papers_per_faculty": [
+                  ["University of California, San Diego", 150.2, 12],
+                  ["University of California, San Francisco", 144.9, 8],
+                  ["Thomas Jefferson University", 98.0, 3],
+                  ["Stanford University", 92.1, 12],
+                  ["Johns Hopkins University", 90.3, 7],
+                  ["University of Texas MD Anderson Cancer Center", 89.1, 7],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 79.4, 7],
+                  ["Weill Cornell Medicine", 79.2, 8],
+                  ["Mayo Clinic - Rochester", 77.7, 28],
+                  ["Henry Ford Health", 70.1, 10],
+                  ["University of Miami", 66.2, 5],
+                  ["University of Michigan", 66.2, 12],
+                  ["University of Texas Southwestern Medical Center", 65.7, 10],
+                  ["University of Maryland", 65.0, 6],
+                  ["University of Washington", 62.5, 11],
+                  ["University of California, Irvine", 61.9, 7],
+                  ["Penn State College of Medicine", 57.3, 7],
+                  ["Mayo Clinic - Phoenix", 55.2, 5],
+                  ["NYU Langone Health", 53.2, 36],
+                  ["University of Arkansas for Medical Sciences", 53.0, 4],
+                  ["Massachusetts General Hospital (Harvard)", 50.0, 20],
+                  ["University of Chicago", 48.7, 3],
+                  ["Mayo Clinic - Jacksonville", 44.8, 6],
+                  ["University of Iowa", 41.9, 9],
+                  ["University of Wisconsin", 41.8, 12]
+            ],
+            "mean_h": [
+                  ["University of California, San Francisco", 27.5, 8],
+                  ["University of California, San Diego", 27.2, 12],
+                  ["Stanford University", 25.8, 12],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 22.6, 7],
+                  ["Thomas Jefferson University", 22.3, 3],
+                  ["University of Michigan", 22.0, 12],
+                  ["Johns Hopkins University", 21.6, 7],
+                  ["University of Texas MD Anderson Cancer Center", 21.3, 7],
+                  ["Mayo Clinic - Rochester", 21.2, 28],
+                  ["Henry Ford Health", 18.5, 10],
+                  ["Penn State College of Medicine", 17.0, 7],
+                  ["Massachusetts General Hospital (Harvard)", 15.9, 20],
+                  ["University of Miami", 15.6, 5],
+                  ["University of Chicago", 15.0, 3],
+                  ["Weill Cornell Medicine", 14.8, 8],
+                  ["NYU Langone Health", 14.6, 36],
+                  ["University of Maryland", 14.5, 6],
+                  ["University of California, Irvine", 13.9, 7],
+                  ["Brigham and Women's Hospital (Harvard)", 13.8, 9],
+                  ["Mayo Clinic - Jacksonville", 13.5, 6],
+                  ["Duke University", 13.4, 9],
+                  ["University of Wisconsin", 13.4, 12],
+                  ["Cedars-Sinai Medical Center", 13.0, 3],
+                  ["University of Arkansas for Medical Sciences", 13.0, 4],
+                  ["University of Texas Southwestern Medical Center", 12.8, 10]
+            ],
+            "median_h": [
+                  ["Johns Hopkins University", 28.0, 7],
+                  ["Stanford University", 21.5, 12],
+                  ["University of Texas MD Anderson Cancer Center", 21.0, 7],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 21.0, 7],
+                  ["University of Michigan", 20.5, 12],
+                  ["University of Chicago", 19.0, 3],
+                  ["University of California, San Francisco", 17.0, 8],
+                  ["University of California, San Diego", 16.5, 12],
+                  ["Mayo Clinic - Rochester", 16.0, 28],
+                  ["University of Miami", 15.0, 5],
+                  ["University of Arkansas for Medical Sciences", 14.0, 4],
+                  ["University of Maryland", 13.5, 6],
+                  ["Mayo Clinic - Jacksonville", 13.5, 6],
+                  ["Massachusetts General Hospital (Harvard)", 13.0, 20],
+                  ["University of Texas Health Science Center at San Antonio", 12.0, 3],
+                  ["Penn State College of Medicine", 12.0, 7],
+                  ["University of Virginia", 12.0, 10],
+                  ["Mayo Clinic - Phoenix", 11.0, 5],
+                  ["University of Texas Medical Branch", 10.5, 3],
+                  ["Cedars-Sinai Medical Center", 10.0, 3],
+                  ["NYU Langone Health", 10.0, 36],
+                  ["University of Texas Southwestern Medical Center", 10.0, 10],
+                  ["Virginia Commonwealth University", 10.0, 5],
+                  ["Brigham and Women's Hospital (Harvard)", 9.5, 9],
+                  ["Weill Cornell Medicine", 9.0, 8]
+            ]
+      }
+  },
+  "Breast Imaging": {
+      "total_faculty": 958,
+      "total_institutions": 111,
+      "rankings": {
+            "papers": [
+                  ["University of Texas MD Anderson Cancer Center", 1780, 32],
+                  ["NYU Langone Health", 1083, 54],
+                  ["Roswell Park Comprehensive Cancer Center", 797, 4],
+                  ["Weill Cornell Medicine", 747, 27],
+                  ["Duke University", 737, 15],
+                  ["University of Pittsburgh", 679, 17],
+                  ["University of Pennsylvania", 651, 16],
+                  ["University of Wisconsin", 575, 12],
+                  ["University of Washington", 568, 12],
+                  ["University of California, San Francisco", 550, 14],
+                  ["Columbia University", 522, 16],
+                  ["Boston University", 518, 7],
+                  ["Memorial Sloan Kettering Cancer Center", 517, 30],
+                  ["Stanford University", 496, 11],
+                  ["University of Texas Southwestern Medical Center", 470, 17],
+                  ["Massachusetts General Hospital (Harvard)", 469, 11],
+                  ["Mayo Clinic - Rochester", 456, 14],
+                  ["Brigham and Women's Hospital (Harvard)", 448, 14],
+                  ["Johns Hopkins University", 410, 15],
+                  ["Icahn School of Medicine at Mount Sinai", 388, 24],
+                  ["George Washington University", 359, 6],
+                  ["Yale University", 334, 16],
+                  ["University of Rochester", 331, 5],
+                  ["Northwestern University", 325, 22],
+                  ["Vanderbilt University", 304, 16]
+            ],
+            "citations": [
+                  ["NYU Langone Health", 53103, 54],
+                  ["University of Texas MD Anderson Cancer Center", 49116, 32],
+                  ["University of Pittsburgh", 32408, 17],
+                  ["Roswell Park Comprehensive Cancer Center", 25826, 4],
+                  ["Stanford University", 24219, 11],
+                  ["University of Pennsylvania", 23250, 16],
+                  ["Duke University", 22421, 15],
+                  ["University of Washington", 18952, 12],
+                  ["Columbia University", 17970, 16],
+                  ["University of Texas Southwestern Medical Center", 17247, 17],
+                  ["Weill Cornell Medicine", 16952, 27],
+                  ["Icahn School of Medicine at Mount Sinai", 16589, 24],
+                  ["University of California, San Francisco", 16530, 14],
+                  ["Massachusetts General Hospital (Harvard)", 14853, 11],
+                  ["Memorial Sloan Kettering Cancer Center", 13791, 30],
+                  ["University of Wisconsin", 13436, 12],
+                  ["Brigham and Women's Hospital (Harvard)", 12863, 14],
+                  ["University of Rochester", 12602, 5],
+                  ["Boston University", 12596, 7],
+                  ["Yale University", 12524, 16],
+                  ["Northwestern University", 12421, 22],
+                  ["Mayo Clinic - Rochester", 10693, 14],
+                  ["University of Utah", 10355, 9],
+                  ["George Washington University", 10099, 6],
+                  ["Brown University", 10014, 12]
+            ],
+            "papers_per_faculty": [
+                  ["Roswell Park Comprehensive Cancer Center", 199.2, 4],
+                  ["Boston University", 74.0, 7],
+                  ["University of Rochester", 66.2, 5],
+                  ["George Washington University", 59.8, 6],
+                  ["University of Texas MD Anderson Cancer Center", 55.6, 32],
+                  ["Duke University", 49.1, 15],
+                  ["University of Wisconsin", 47.9, 12],
+                  ["University of Washington", 47.3, 12],
+                  ["Stanford University", 45.1, 11],
+                  ["Massachusetts General Hospital (Harvard)", 42.6, 11],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 41.7, 3],
+                  ["University of Pennsylvania", 40.7, 16],
+                  ["University of Pittsburgh", 39.9, 17],
+                  ["University of California, San Francisco", 39.3, 14],
+                  ["Mayo Clinic - Phoenix", 37.3, 7],
+                  ["University of Iowa", 34.5, 6],
+                  ["Columbia University", 32.6, 16],
+                  ["Mayo Clinic - Rochester", 32.6, 14],
+                  ["University of Utah", 32.4, 9],
+                  ["Brigham and Women's Hospital (Harvard)", 32.0, 14],
+                  ["University of California, San Diego", 31.9, 9],
+                  ["Penn State College of Medicine", 28.4, 8],
+                  ["Weill Cornell Medicine", 27.7, 27],
+                  ["University of Texas Southwestern Medical Center", 27.6, 17],
+                  ["Johns Hopkins University", 27.3, 15]
+            ],
+            "mean_h": [
+                  ["University of Rochester", 22.0, 5],
+                  ["Roswell Park Comprehensive Cancer Center", 21.0, 4],
+                  ["Stanford University", 18.9, 11],
+                  ["Boston University", 18.5, 7],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 17.0, 3],
+                  ["George Washington University", 16.0, 6],
+                  ["University of Washington", 15.2, 12],
+                  ["Massachusetts General Hospital (Harvard)", 14.8, 11],
+                  ["University of Pittsburgh", 14.7, 17],
+                  ["University of Texas MD Anderson Cancer Center", 14.6, 32],
+                  ["Duke University", 14.5, 15],
+                  ["University of Wisconsin", 14.2, 12],
+                  ["Mayo Clinic - Phoenix", 13.6, 7],
+                  ["University of Pennsylvania", 13.4, 16],
+                  ["University of California, San Francisco", 12.8, 14],
+                  ["Brigham and Women's Hospital (Harvard)", 12.1, 14],
+                  ["Mayo Clinic - Rochester", 11.5, 14],
+                  ["University of Utah", 10.9, 9],
+                  ["Columbia University", 10.8, 16],
+                  ["University of California, San Diego", 10.8, 9],
+                  ["Brown University", 10.6, 12],
+                  ["Fox Chase Cancer Center", 10.3, 4],
+                  ["Penn State College of Medicine", 10.1, 8],
+                  ["Dartmouth (Geisel School of Medicine)", 10.0, 6],
+                  ["Houston Methodist", 10.0, 7]
+            ],
+            "median_h": [
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 23.0, 3],
+                  ["University of Rochester", 18.0, 5],
+                  ["Boston University", 14.5, 7],
+                  ["Stanford University", 14.5, 11],
+                  ["University of California, San Francisco", 13.0, 14],
+                  ["Mayo Clinic - Rochester", 13.0, 14],
+                  ["University of Wisconsin", 13.0, 12],
+                  ["Mayo Clinic - Phoenix", 13.0, 7],
+                  ["Brigham and Women's Hospital (Harvard)", 11.0, 14],
+                  ["University of California, San Diego", 11.0, 9],
+                  ["Massachusetts General Hospital (Harvard)", 11.0, 11],
+                  ["George Washington University", 11.0, 6],
+                  ["University of Washington", 10.5, 12],
+                  ["University of Texas MD Anderson Cancer Center", 10.0, 32],
+                  ["Duke University", 10.0, 15],
+                  ["University of Texas Health Science Center at San Antonio", 9.0, 5],
+                  ["Weill Cornell Medicine", 9.0, 27],
+                  ["University of Texas Southwestern Medical Center", 8.0, 17],
+                  ["Memorial Sloan Kettering Cancer Center", 8.0, 30],
+                  ["University of South Florida", 8.0, 13],
+                  ["University of Pittsburgh", 8.0, 17],
+                  ["Houston Methodist", 7.5, 7],
+                  ["University of Michigan", 7.5, 12],
+                  ["Medical University of South Carolina", 7.5, 10],
+                  ["Fox Chase Cancer Center", 7.0, 4]
+            ]
+      }
+  },
+  "Nuclear Medicine": {
+      "total_faculty": 510,
+      "total_institutions": 109,
+      "rankings": {
+            "papers": [
+                  ["University of Pennsylvania", 2497, 13],
+                  ["University of Texas Southwestern Medical Center", 2225, 19],
+                  ["University of California, Los Angeles", 2091, 17],
+                  ["Brigham and Women's Hospital (Harvard)", 2030, 12],
+                  ["University of California, San Francisco", 1993, 14],
+                  ["Washington University in St. Louis", 1530, 13],
+                  ["University of Texas MD Anderson Cancer Center", 1241, 15],
+                  ["University of Michigan", 1221, 12],
+                  ["Massachusetts General Hospital (Harvard)", 1215, 15],
+                  ["University of Washington", 1109, 14],
+                  ["Mayo Clinic - Rochester", 1021, 6],
+                  ["Emory University", 999, 13],
+                  ["Johns Hopkins University", 963, 7],
+                  ["University of Utah", 950, 5],
+                  ["University of Iowa", 872, 10],
+                  ["University of Southern California", 859, 4],
+                  ["University of Alabama at Birmingham", 835, 10],
+                  ["Stanford University", 831, 11],
+                  ["University of Illinois at Chicago", 782, 2],
+                  ["Memorial Sloan Kettering Cancer Center", 719, 6],
+                  ["Albert Einstein College of Medicine", 659, 5],
+                  ["University of California, Davis", 615, 10],
+                  ["Duke University", 609, 7],
+                  ["Yale University", 598, 3],
+                  ["University of Cincinnati", 559, 2]
+            ],
+            "citations": [
+                  ["Brigham and Women's Hospital (Harvard)", 159859, 12],
+                  ["University of California, Los Angeles", 111798, 17],
+                  ["University of Pennsylvania", 107448, 13],
+                  ["University of California, San Francisco", 102911, 14],
+                  ["Johns Hopkins University", 92510, 7],
+                  ["University of Texas Southwestern Medical Center", 90751, 19],
+                  ["Washington University in St. Louis", 89082, 13],
+                  ["University of Utah", 68545, 5],
+                  ["University of Michigan", 59179, 12],
+                  ["Massachusetts General Hospital (Harvard)", 58325, 15],
+                  ["University of Texas MD Anderson Cancer Center", 57691, 15],
+                  ["Mayo Clinic - Rochester", 52981, 6],
+                  ["University of Washington", 51546, 14],
+                  ["Memorial Sloan Kettering Cancer Center", 42147, 6],
+                  ["Yale University", 40268, 3],
+                  ["University of Illinois at Chicago", 38435, 2],
+                  ["Institute for Neurodegenerative Disorders", 34069, 1],
+                  ["University of Iowa", 33902, 10],
+                  ["Duke University", 33010, 7],
+                  ["University of Southern California", 32064, 4],
+                  ["Emory University", 29856, 13],
+                  ["University of Maryland", 28000, 4],
+                  ["Stanford University", 24058, 11],
+                  ["University of Wisconsin", 21395, 8],
+                  ["University of Alabama at Birmingham", 19925, 10]
+            ],
+            "papers_per_faculty": [
+                  ["University of Southern California", 214.8, 4],
+                  ["Yale University", 199.3, 3],
+                  ["University of Pennsylvania", 192.1, 13],
+                  ["University of Utah", 190.0, 5],
+                  ["Mayo Clinic - Rochester", 170.2, 6],
+                  ["Brigham and Women's Hospital (Harvard)", 169.2, 12],
+                  ["University of California, San Francisco", 142.4, 14],
+                  ["Johns Hopkins University", 137.6, 7],
+                  ["Albert Einstein College of Medicine", 131.8, 5],
+                  ["University of Maryland", 129.2, 4],
+                  ["University of California, Los Angeles", 123.0, 17],
+                  ["Memorial Sloan Kettering Cancer Center", 119.8, 6],
+                  ["Washington University in St. Louis", 117.7, 13],
+                  ["University of Texas Southwestern Medical Center", 117.1, 19],
+                  ["University of Michigan", 101.8, 12],
+                  ["University of Iowa", 87.2, 10],
+                  ["Duke University", 87.0, 7],
+                  ["Henry Ford Health", 84.7, 3],
+                  ["University of Alabama at Birmingham", 83.5, 10],
+                  ["University of Texas MD Anderson Cancer Center", 82.7, 15],
+                  ["Virginia Commonwealth University", 82.0, 3],
+                  ["Massachusetts General Hospital (Harvard)", 81.0, 15],
+                  ["University of Washington", 79.2, 14],
+                  ["Emory University", 76.8, 13],
+                  ["Allegheny Health Network", 76.0, 4]
+            ],
+            "mean_h": [
+                  ["University of Utah", 46.4, 5],
+                  ["University of Southern California", 41.8, 4],
+                  ["Brigham and Women's Hospital (Harvard)", 38.6, 12],
+                  ["Mayo Clinic - Rochester", 36.3, 6],
+                  ["University of California, Los Angeles", 35.7, 17],
+                  ["Memorial Sloan Kettering Cancer Center", 35.3, 6],
+                  ["University of California, San Francisco", 35.0, 14],
+                  ["Yale University", 34.0, 3],
+                  ["University of Pennsylvania", 33.9, 13],
+                  ["Johns Hopkins University", 33.9, 7],
+                  ["University of Maryland", 31.8, 4],
+                  ["Henry Ford Health", 31.0, 3],
+                  ["Washington University in St. Louis", 29.9, 13],
+                  ["University of Michigan", 27.1, 12],
+                  ["University of Texas Southwestern Medical Center", 26.2, 19],
+                  ["University of Iowa", 25.8, 10],
+                  ["Duke University", 25.1, 7],
+                  ["University of Texas MD Anderson Cancer Center", 24.0, 15],
+                  ["University of California, San Diego", 24.0, 3],
+                  ["University of New Mexico", 22.5, 4],
+                  ["Virginia Commonwealth University", 22.0, 3],
+                  ["Albert Einstein College of Medicine", 20.8, 5],
+                  ["Stanford University", 20.5, 11],
+                  ["Emory University", 20.0, 13],
+                  ["Massachusetts General Hospital (Harvard)", 19.2, 15]
+            ],
+            "median_h": [
+                  ["University of Utah", 61.0, 5],
+                  ["University of Southern California", 48.0, 4],
+                  ["Brigham and Women's Hospital (Harvard)", 38.0, 12],
+                  ["Johns Hopkins University", 36.0, 7],
+                  ["University of California, Los Angeles", 35.0, 17],
+                  ["Henry Ford Health", 34.0, 3],
+                  ["University of California, San Francisco", 31.5, 14],
+                  ["Mayo Clinic - Rochester", 30.0, 6],
+                  ["University of Maryland", 29.5, 4],
+                  ["Memorial Sloan Kettering Cancer Center", 27.0, 6],
+                  ["Virginia Commonwealth University", 26.0, 3],
+                  ["Albert Einstein College of Medicine", 26.0, 5],
+                  ["University of Michigan", 25.5, 12],
+                  ["University of Iowa", 25.0, 10],
+                  ["Duke University", 23.0, 7],
+                  ["University of Pennsylvania", 22.0, 13],
+                  ["Stanford University", 21.0, 11],
+                  ["University of Texas MD Anderson Cancer Center", 20.0, 15],
+                  ["Loma Linda University", 17.0, 3],
+                  ["University of Texas Southwestern Medical Center", 17.0, 19],
+                  ["University of Kentucky", 17.0, 3],
+                  ["Emory University", 16.0, 13],
+                  ["Washington University in St. Louis", 15.0, 13],
+                  ["Massachusetts General Hospital (Harvard)", 14.5, 15],
+                  ["Mayo Clinic - Jacksonville", 14.0, 3]
+            ]
+      }
+  },
+  "Pediatric Radiology": {
+      "total_faculty": 955,
+      "total_institutions": 114,
+      "rankings": {
+            "papers": [
+                  ["Massachusetts General Hospital (Harvard)", 4552, 51],
+                  ["University of Pennsylvania", 4415, 60],
+                  ["Stanford University", 2524, 28],
+                  ["University of Cincinnati", 2368, 23],
+                  ["Baylor College of Medicine", 2244, 56],
+                  ["Northwestern University", 1883, 30],
+                  ["Emory University", 1371, 37],
+                  ["George Washington University", 1313, 23],
+                  ["University of Washington", 1272, 32],
+                  ["Washington University in St. Louis", 1074, 7],
+                  ["Wake Forest University", 1026, 14],
+                  ["Indiana University", 958, 8],
+                  ["Ohio State University", 955, 31],
+                  ["University of Pittsburgh", 904, 23],
+                  ["University of Arizona", 889, 25],
+                  ["University of Rochester", 849, 12],
+                  ["University of Central Florida", 817, 7],
+                  ["Dartmouth (Geisel School of Medicine)", 817, 3],
+                  ["University of Tennessee Health Science Center", 668, 32],
+                  ["University of Texas Southwestern Medical Center", 625, 27],
+                  ["Vanderbilt University", 596, 18],
+                  ["University of Michigan", 575, 8],
+                  ["University of Arkansas for Medical Sciences", 509, 22],
+                  ["University of Southern California", 509, 10],
+                  ["Mayo Clinic - Rochester", 505, 10]
+            ],
+            "citations": [
+                  ["Massachusetts General Hospital (Harvard)", 165618, 51],
+                  ["University of Pennsylvania", 104145, 60],
+                  ["Stanford University", 94338, 28],
+                  ["Northwestern University", 70670, 30],
+                  ["Baylor College of Medicine", 63537, 56],
+                  ["Washington University in St. Louis", 58289, 7],
+                  ["University of Cincinnati", 58214, 23],
+                  ["George Washington University", 47674, 23],
+                  ["Wake Forest University", 45507, 14],
+                  ["Dartmouth (Geisel School of Medicine)", 43746, 3],
+                  ["University of Rochester", 35750, 12],
+                  ["University of Central Florida", 34863, 7],
+                  ["University of Pittsburgh", 33587, 23],
+                  ["Ohio State University", 32086, 31],
+                  ["Emory University", 30777, 37],
+                  ["University of Washington", 28881, 32],
+                  ["University of Arizona", 24074, 25],
+                  ["Northeast Ohio Medical University", 20457, 12],
+                  ["University of Tennessee Health Science Center", 20337, 32],
+                  ["University of Michigan", 19719, 8],
+                  ["University of Texas Southwestern Medical Center", 17978, 27],
+                  ["Wayne State University", 17352, 5],
+                  ["University of California, Irvine", 14750, 10],
+                  ["Duke University", 14689, 8],
+                  ["University of North Carolina at Chapel Hill", 13470, 7]
+            ],
+            "papers_per_faculty": [
+                  ["Dartmouth (Geisel School of Medicine)", 272.3, 3],
+                  ["Washington University in St. Louis", 153.4, 7],
+                  ["Indiana University", 119.8, 8],
+                  ["University of Central Florida", 116.7, 7],
+                  ["Icahn School of Medicine at Mount Sinai", 105.5, 4],
+                  ["University of Cincinnati", 103.0, 23],
+                  ["Stanford University", 90.1, 28],
+                  ["Massachusetts General Hospital (Harvard)", 89.3, 51],
+                  ["Albert Einstein College of Medicine", 81.0, 4],
+                  ["University of Pennsylvania", 73.6, 60],
+                  ["Wake Forest University", 73.3, 14],
+                  ["Cedars-Sinai Medical Center", 72.7, 3],
+                  ["University of Michigan", 71.9, 8],
+                  ["University of Rochester", 70.8, 12],
+                  ["Wayne State University", 70.6, 5],
+                  ["Thomas Jefferson University", 68.0, 3],
+                  ["University of North Carolina at Chapel Hill", 66.3, 7],
+                  ["Northwestern University", 62.8, 30],
+                  ["Duke University", 62.1, 8],
+                  ["George Washington University", 57.1, 23],
+                  ["Case Western Reserve University", 53.4, 8],
+                  ["University of Southern California", 50.9, 10],
+                  ["Mayo Clinic - Rochester", 50.5, 10],
+                  ["University of New Mexico", 48.3, 3],
+                  ["University of Texas Health Science Center at Houston", 46.7, 6]
+            ],
+            "mean_h": [
+                  ["Washington University in St. Louis", 33.9, 7],
+                  ["University of Central Florida", 26.7, 7],
+                  ["Albert Einstein College of Medicine", 24.8, 4],
+                  ["Massachusetts General Hospital (Harvard)", 24.3, 51],
+                  ["University of Cincinnati", 23.8, 23],
+                  ["Stanford University", 23.2, 28],
+                  ["Wake Forest University", 21.1, 14],
+                  ["Icahn School of Medicine at Mount Sinai", 20.5, 4],
+                  ["University of Rochester", 20.2, 12],
+                  ["Wayne State University", 20.2, 5],
+                  ["University of New Mexico", 20.0, 3],
+                  ["Cedars-Sinai Medical Center", 19.7, 3],
+                  ["Thomas Jefferson University", 18.0, 3],
+                  ["University of Michigan", 17.8, 8],
+                  ["Mayo Clinic - Rochester", 17.7, 10],
+                  ["George Washington University", 17.4, 23],
+                  ["University of Pennsylvania", 17.4, 60],
+                  ["Indiana University", 15.9, 8],
+                  ["Duke University", 15.6, 8],
+                  ["University of Texas Health Science Center at Houston", 15.5, 6],
+                  ["University of North Carolina at Chapel Hill", 15.4, 7],
+                  ["Northwestern University", 15.0, 30],
+                  ["Northeast Ohio Medical University", 14.2, 12],
+                  ["University of Southern California", 14.2, 10],
+                  ["Columbia University", 13.7, 6]
+            ],
+            "median_h": [
+                  ["Washington University in St. Louis", 45.0, 7],
+                  ["Cedars-Sinai Medical Center", 23.0, 3],
+                  ["University of Cincinnati", 22.0, 23],
+                  ["Albert Einstein College of Medicine", 21.5, 4],
+                  ["Stanford University", 20.5, 28],
+                  ["Massachusetts General Hospital (Harvard)", 20.0, 51],
+                  ["University of Rochester", 17.0, 12],
+                  ["Mayo Clinic - Rochester", 17.0, 10],
+                  ["University of Central Florida", 16.0, 7],
+                  ["University of Pennsylvania", 15.5, 60],
+                  ["Wake Forest University", 14.5, 14],
+                  ["University of New Mexico", 14.0, 3],
+                  ["Icahn School of Medicine at Mount Sinai", 13.5, 4],
+                  ["Indiana University", 12.5, 8],
+                  ["Columbia University", 12.0, 6],
+                  ["University of North Carolina at Chapel Hill", 12.0, 7],
+                  ["Baylor College of Medicine", 11.5, 56],
+                  ["Duke University", 11.5, 8],
+                  ["University of Southern California", 11.5, 10],
+                  ["University of Texas Health Science Center at Houston", 11.0, 6],
+                  ["NYU Langone Health", 11.0, 7],
+                  ["Northeast Ohio Medical University", 11.0, 12],
+                  ["George Washington University", 11.0, 23],
+                  ["University of Wisconsin", 11.0, 7],
+                  ["University of Michigan", 10.5, 8]
+            ]
+      }
+  },
+  "Interventional Radiology": {
+      "total_faculty": 889,
+      "total_institutions": 104,
+      "rankings": {
+            "papers": [
+                  ["Massachusetts General Hospital (Harvard)", 2463, 17],
+                  ["Memorial Sloan Kettering Cancer Center", 2193, 29],
+                  ["University of Texas MD Anderson Cancer Center", 1963, 31],
+                  ["University of Pennsylvania", 1749, 18],
+                  ["University of Virginia", 1351, 11],
+                  ["Emory University", 1308, 24],
+                  ["Northwestern University", 1033, 10],
+                  ["University of California, Los Angeles", 1027, 17],
+                  ["Yale University", 1001, 18],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 949, 12],
+                  ["University of Chicago", 930, 7],
+                  ["Stanford University", 901, 14],
+                  ["University of Texas Southwestern Medical Center", 865, 15],
+                  ["Brigham and Women's Hospital (Harvard)", 732, 9],
+                  ["Washington University in St. Louis", 729, 19],
+                  ["Duke University", 699, 16],
+                  ["Mayo Clinic - Rochester", 688, 13],
+                  ["Weill Cornell Medicine", 661, 20],
+                  ["University of Wisconsin", 632, 15],
+                  ["Johns Hopkins University", 596, 9],
+                  ["University of Arizona", 587, 8],
+                  ["Vanderbilt University", 535, 12],
+                  ["University of North Carolina at Chapel Hill", 533, 13],
+                  ["Oregon Health & Science University", 532, 8],
+                  ["Icahn School of Medicine at Mount Sinai", 530, 15]
+            ],
+            "citations": [
+                  ["Massachusetts General Hospital (Harvard)", 202763, 17],
+                  ["Memorial Sloan Kettering Cancer Center", 82695, 29],
+                  ["University of Virginia", 81097, 11],
+                  ["University of Texas MD Anderson Cancer Center", 73861, 31],
+                  ["University of Pennsylvania", 62057, 18],
+                  ["Emory University", 60598, 24],
+                  ["Northwestern University", 44159, 10],
+                  ["Brigham and Women's Hospital (Harvard)", 39015, 9],
+                  ["University of California, Los Angeles", 35853, 17],
+                  ["Vanderbilt University", 35414, 12],
+                  ["Stanford University", 32067, 14],
+                  ["University of Arizona", 30774, 8],
+                  ["Yale University", 30622, 18],
+                  ["Wake Forest University", 29814, 7],
+                  ["University of Texas Southwestern Medical Center", 29100, 15],
+                  ["Washington University in St. Louis", 26585, 19],
+                  ["Mayo Clinic - Rochester", 26187, 13],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 25458, 12],
+                  ["Weill Cornell Medicine", 23297, 20],
+                  ["University of Michigan", 20202, 9],
+                  ["Mayo Clinic - Phoenix", 18193, 7],
+                  ["Johns Hopkins University", 17223, 9],
+                  ["University of Chicago", 17041, 7],
+                  ["University of Washington", 16266, 15],
+                  ["Oregon Health & Science University", 16265, 8]
+            ],
+            "papers_per_faculty": [
+                  ["Massachusetts General Hospital (Harvard)", 144.9, 17],
+                  ["University of Chicago", 132.9, 7],
+                  ["University of Virginia", 122.8, 11],
+                  ["Northwestern University", 103.3, 10],
+                  ["University of Pennsylvania", 97.2, 18],
+                  ["University of Southern California", 95.0, 5],
+                  ["Albert Einstein College of Medicine", 89.7, 3],
+                  ["George Washington University", 88.8, 5],
+                  ["Brigham and Women's Hospital (Harvard)", 81.3, 9],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 79.1, 12],
+                  ["Memorial Sloan Kettering Cancer Center", 75.6, 29],
+                  ["University of Arizona", 73.4, 8],
+                  ["Oregon Health & Science University", 66.5, 8],
+                  ["Johns Hopkins University", 66.2, 9],
+                  ["Stanford University", 64.4, 14],
+                  ["University of Texas MD Anderson Cancer Center", 63.3, 31],
+                  ["Mayo Clinic - Phoenix", 62.4, 7],
+                  ["University of Maryland", 61.8, 4],
+                  ["University of California, Los Angeles", 60.4, 17],
+                  ["University of Mississippi", 59.4, 7],
+                  ["University of Texas Southwestern Medical Center", 57.7, 15],
+                  ["Yale University", 55.6, 18],
+                  ["Emory University", 54.5, 24],
+                  ["Mayo Clinic - Rochester", 52.9, 13],
+                  ["Wake Forest University", 45.7, 7]
+            ],
+            "mean_h": [
+                  ["Massachusetts General Hospital (Harvard)", 26.5, 17],
+                  ["University of Pennsylvania", 25.8, 18],
+                  ["University of Virginia", 25.4, 11],
+                  ["Albert Einstein College of Medicine", 25.3, 3],
+                  ["Brigham and Women's Hospital (Harvard)", 24.4, 9],
+                  ["University of Chicago", 24.0, 7],
+                  ["Northwestern University", 23.7, 10],
+                  ["Stanford University", 19.8, 14],
+                  ["George Washington University", 19.4, 5],
+                  ["Mayo Clinic - Phoenix", 18.6, 7],
+                  ["University of Texas MD Anderson Cancer Center", 18.5, 31],
+                  ["Memorial Sloan Kettering Cancer Center", 18.3, 29],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 18.1, 12],
+                  ["University of Maryland", 17.5, 4],
+                  ["Oregon Health & Science University", 16.9, 8],
+                  ["Johns Hopkins University", 16.7, 9],
+                  ["University of Arizona", 16.4, 8],
+                  ["University of California, Los Angeles", 16.2, 17],
+                  ["Mayo Clinic - Rochester", 15.4, 13],
+                  ["Vanderbilt University", 15.2, 12],
+                  ["University of Florida", 15.2, 4],
+                  ["University of Texas Southwestern Medical Center", 15.1, 15],
+                  ["Yale University", 15.1, 18],
+                  ["University of Southern California", 13.8, 5],
+                  ["Emory University", 13.5, 24]
+            ],
+            "median_h": [
+                  ["Albert Einstein College of Medicine", 26.0, 3],
+                  ["University of Chicago", 24.0, 7],
+                  ["University of Pennsylvania", 23.0, 18],
+                  ["Brigham and Women's Hospital (Harvard)", 20.0, 9],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 17.5, 12],
+                  ["Stanford University", 16.0, 14],
+                  ["Northwestern University", 16.0, 10],
+                  ["George Washington University", 13.0, 5],
+                  ["Massachusetts General Hospital (Harvard)", 13.0, 17],
+                  ["University of California, Los Angeles", 13.0, 17],
+                  ["University of California, Davis", 12.0, 4],
+                  ["University of Maryland", 12.0, 4],
+                  ["Memorial Sloan Kettering Cancer Center", 12.0, 29],
+                  ["Medical College of Wisconsin", 12.0, 9],
+                  ["University of Texas MD Anderson Cancer Center", 12.0, 31],
+                  ["Yale University", 11.5, 18],
+                  ["Oregon Health & Science University", 11.5, 8],
+                  ["University of Southern California", 11.0, 5],
+                  ["Johns Hopkins University", 11.0, 9],
+                  ["Mayo Clinic - Rochester", 11.0, 13],
+                  ["University of Florida", 10.5, 4],
+                  ["University of Texas Southwestern Medical Center", 9.5, 15],
+                  ["University of North Carolina at Chapel Hill", 9.0, 13],
+                  ["Michigan State University", 9.0, 3],
+                  ["Dartmouth (Geisel School of Medicine)", 9.0, 6]
+            ]
+      }
+  },
+  "Abdominal Imaging": {
+      "total_faculty": 1380,
+      "total_institutions": 104,
+      "rankings": {
+            "papers": [
+                  ["Mayo Clinic - Rochester", 5935, 79],
+                  ["University of Texas MD Anderson Cancer Center", 4172, 66],
+                  ["Brigham and Women's Hospital (Harvard)", 3542, 34],
+                  ["Johns Hopkins University", 3133, 19],
+                  ["Massachusetts General Hospital (Harvard)", 2505, 19],
+                  ["NYU Langone Health", 2267, 74],
+                  ["Memorial Sloan Kettering Cancer Center", 2129, 67],
+                  ["University of Washington", 2063, 26],
+                  ["University of Wisconsin", 1762, 19],
+                  ["Weill Cornell Medicine", 1658, 32],
+                  ["Duke University", 1329, 16],
+                  ["University of Michigan", 1302, 31],
+                  ["University of Pennsylvania", 1274, 29],
+                  ["University of Texas Southwestern Medical Center", 1182, 27],
+                  ["University of Vermont", 1090, 33],
+                  ["Northwestern University", 1063, 18],
+                  ["Cleveland Clinic", 1032, 21],
+                  ["Medical College of Wisconsin", 982, 29],
+                  ["Washington University in St. Louis", 980, 18],
+                  ["University of California, San Francisco", 952, 21],
+                  ["Mayo Clinic - Phoenix", 937, 9],
+                  ["Case Western Reserve University", 835, 6],
+                  ["University of Alabama at Birmingham", 799, 14],
+                  ["University of Rochester", 742, 13],
+                  ["Stanford University", 729, 19]
+            ],
+            "citations": [
+                  ["Mayo Clinic - Rochester", 192621, 79],
+                  ["Brigham and Women's Hospital (Harvard)", 174415, 34],
+                  ["University of Texas MD Anderson Cancer Center", 143811, 66],
+                  ["Johns Hopkins University", 143312, 19],
+                  ["Memorial Sloan Kettering Cancer Center", 95954, 67],
+                  ["Massachusetts General Hospital (Harvard)", 95815, 19],
+                  ["University of Washington", 87350, 26],
+                  ["NYU Langone Health", 86476, 74],
+                  ["University of Pennsylvania", 74255, 29],
+                  ["University of Wisconsin", 69293, 19],
+                  ["Weill Cornell Medicine", 60972, 32],
+                  ["Duke University", 49201, 16],
+                  ["University of Alabama at Birmingham", 42273, 14],
+                  ["University of Michigan", 41499, 31],
+                  ["University of Texas Southwestern Medical Center", 34540, 27],
+                  ["Northwestern University", 34209, 18],
+                  ["University of South Florida", 32930, 6],
+                  ["Medical College of Wisconsin", 32229, 29],
+                  ["Cleveland Clinic", 31406, 21],
+                  ["Case Western Reserve University", 30379, 6],
+                  ["University of California, San Francisco", 28404, 21],
+                  ["Mayo Clinic - Phoenix", 28159, 9],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 24670, 12],
+                  ["Oregon Health & Science University", 23869, 14],
+                  ["University of California, Los Angeles", 23104, 17]
+            ],
+            "papers_per_faculty": [
+                  ["Johns Hopkins University", 164.9, 19],
+                  ["Case Western Reserve University", 139.2, 6],
+                  ["Massachusetts General Hospital (Harvard)", 131.8, 19],
+                  ["Brigham and Women's Hospital (Harvard)", 104.2, 34],
+                  ["Mayo Clinic - Phoenix", 104.1, 9],
+                  ["University of Wisconsin", 92.7, 19],
+                  ["George Washington University", 91.7, 3],
+                  ["Duke University", 83.1, 16],
+                  ["University of Washington", 79.3, 26],
+                  ["Mayo Clinic - Rochester", 75.1, 79],
+                  ["University of Chicago", 72.3, 7],
+                  ["University of California, Davis", 66.0, 10],
+                  ["University of South Florida", 65.2, 6],
+                  ["University of Texas MD Anderson Cancer Center", 63.2, 66],
+                  ["Northwestern University", 59.1, 18],
+                  ["University of Rochester", 57.1, 13],
+                  ["University of Alabama at Birmingham", 57.1, 14],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 57.0, 12],
+                  ["University of Minnesota", 56.4, 5],
+                  ["Washington University in St. Louis", 54.4, 18],
+                  ["University of Maryland", 53.0, 4],
+                  ["Weill Cornell Medicine", 51.8, 32],
+                  ["Cleveland Clinic", 49.1, 21],
+                  ["Loma Linda University", 46.7, 3],
+                  ["Boston University", 46.4, 8]
+            ],
+            "mean_h": [
+                  ["Case Western Reserve University", 30.2, 6],
+                  ["Massachusetts General Hospital (Harvard)", 29.3, 19],
+                  ["Johns Hopkins University", 28.3, 19],
+                  ["George Washington University", 26.7, 3],
+                  ["Brigham and Women's Hospital (Harvard)", 26.2, 34],
+                  ["Mayo Clinic - Phoenix", 23.4, 9],
+                  ["Duke University", 22.2, 16],
+                  ["University of Washington", 20.7, 26],
+                  ["University of Wisconsin", 20.2, 19],
+                  ["Mayo Clinic - Rochester", 19.6, 79],
+                  ["Loma Linda University", 19.0, 3],
+                  ["University of Texas MD Anderson Cancer Center", 18.5, 66],
+                  ["University of Minnesota", 17.4, 5],
+                  ["University of Chicago", 17.1, 7],
+                  ["Northwestern University", 16.6, 18],
+                  ["University of Alabama at Birmingham", 16.2, 14],
+                  ["Beth Israel Deaconess Medical Center (Harvard)", 16.2, 12],
+                  ["University of South Florida", 15.8, 6],
+                  ["University of Maryland", 15.5, 4],
+                  ["Cleveland Clinic", 15.1, 21],
+                  ["University of California, San Francisco", 14.5, 21],
+                  ["Boston University", 14.5, 8],
+                  ["University of California, Davis", 14.3, 10],
+                  ["University of Pennsylvania", 14.2, 29],
+                  ["University of Rochester", 14.1, 13]
+            ],
+            "median_h": [
+                  ["Case Western Reserve University", 29.0, 6],
+                  ["Massachusetts General Hospital (Harvard)", 26.0, 19],
+                  ["Johns Hopkins University", 22.5, 19],
+                  ["Brigham and Women's Hospital (Harvard)", 22.0, 34],
+                  ["George Washington University", 20.0, 3],
+                  ["University of Texas MD Anderson Cancer Center", 17.5, 66],
+                  ["Duke University", 16.0, 16],
+                  ["Mayo Clinic - Rochester", 15.0, 79],
+                  ["Mayo Clinic - Phoenix", 15.0, 9],
+                  ["University of California, San Diego", 15.0, 13],
+                  ["University of California, San Francisco", 14.0, 21],
+                  ["University of Minnesota", 13.0, 5],
+                  ["Loma Linda University", 13.0, 3],
+                  ["University of Washington", 12.5, 26],
+                  ["Mayo Clinic - Jacksonville", 12.0, 13],
+                  ["University of Michigan", 12.0, 31],
+                  ["University of Wisconsin", 12.0, 19],
+                  ["Loyola University Chicago", 11.5, 8],
+                  ["SUNY Upstate Medical University", 11.0, 3],
+                  ["Cleveland Clinic", 11.0, 21],
+                  ["Boston University", 11.0, 8],
+                  ["University of Texas Health Science Center at San Antonio", 11.0, 7],
+                  ["Wake Forest University", 10.5, 4],
+                  ["Northwestern University", 10.5, 18],
+                  ["University of Maryland", 10.0, 4]
+            ]
+      }
+  },
+  "Cardiothoracic Imaging": {
+      "total_faculty": 565,
+      "total_institutions": 87,
+      "rankings": {
+            "papers": [
+                  ["University of Wisconsin", 2266, 14],
+                  ["Cedars-Sinai Medical Center", 2014, 4],
+                  ["University of Pennsylvania", 1878, 22],
+                  ["Massachusetts General Hospital (Harvard)", 1823, 16],
+                  ["University of Texas MD Anderson Cancer Center", 1733, 17],
+                  ["Washington University in St. Louis", 1653, 15],
+                  ["Cleveland Clinic", 1545, 8],
+                  ["University of Iowa", 1207, 5],
+                  ["Stanford University", 1016, 13],
+                  ["Emory University", 922, 11],
+                  ["Brigham and Women's Hospital (Harvard)", 911, 18],
+                  ["University of Virginia", 888, 9],
+                  ["Medical University of South Carolina", 870, 10],
+                  ["Columbia University", 867, 12],
+                  ["NYU Langone Health", 811, 22],
+                  ["University of Alabama at Birmingham", 763, 9],
+                  ["Mayo Clinic - Rochester", 756, 8],
+                  ["University of Michigan", 744, 10],
+                  ["Duke University", 709, 14],
+                  ["Johns Hopkins University", 703, 6],
+                  ["University of Washington", 702, 10],
+                  ["University of California, Los Angeles", 671, 17],
+                  ["University of Florida", 620, 6],
+                  ["Vanderbilt University", 574, 9],
+                  ["Mayo Clinic - Phoenix", 509, 7]
+            ],
+            "citations": [
+                  ["Cedars-Sinai Medical Center", 155134, 4],
+                  ["University of Wisconsin", 132703, 14],
+                  ["Cleveland Clinic", 86949, 8],
+                  ["Massachusetts General Hospital (Harvard)", 84294, 16],
+                  ["University of Texas MD Anderson Cancer Center", 73025, 17],
+                  ["University of Pennsylvania", 62678, 22],
+                  ["Washington University in St. Louis", 61260, 15],
+                  ["University of Iowa", 56761, 5],
+                  ["Stanford University", 52687, 13],
+                  ["University of Michigan", 47334, 10],
+                  ["University of Virginia", 46601, 9],
+                  ["Brigham and Women's Hospital (Harvard)", 37990, 18],
+                  ["Vanderbilt University", 35451, 9],
+                  ["Emory University", 35394, 11],
+                  ["University of California, Los Angeles", 34309, 17],
+                  ["Duke University", 32497, 14],
+                  ["Medical University of South Carolina", 32179, 10],
+                  ["Columbia University", 30875, 12],
+                  ["University of Arizona", 30831, 5],
+                  ["University of Washington", 27478, 10],
+                  ["Memorial Sloan Kettering Cancer Center", 25847, 3],
+                  ["NYU Langone Health", 25030, 22],
+                  ["Icahn School of Medicine at Mount Sinai", 23572, 6],
+                  ["University of California, San Diego", 22694, 9],
+                  ["Mayo Clinic - Rochester", 19746, 8]
+            ],
+            "papers_per_faculty": [
+                  ["Cedars-Sinai Medical Center", 503.5, 4],
+                  ["University of Iowa", 241.4, 5],
+                  ["Cleveland Clinic", 193.1, 8],
+                  ["University of Maryland", 164.3, 3],
+                  ["University of Wisconsin", 161.9, 14],
+                  ["Case Western Reserve University", 127.7, 3],
+                  ["Johns Hopkins University", 117.2, 6],
+                  ["Massachusetts General Hospital (Harvard)", 113.9, 16],
+                  ["Washington University in St. Louis", 110.2, 15],
+                  ["University of Florida", 103.3, 6],
+                  ["University of Texas MD Anderson Cancer Center", 101.9, 17],
+                  ["University of Virginia", 98.7, 9],
+                  ["Memorial Sloan Kettering Cancer Center", 96.7, 3],
+                  ["Mayo Clinic - Rochester", 94.5, 8],
+                  ["Medical University of South Carolina", 87.0, 10],
+                  ["University of Pennsylvania", 85.4, 22],
+                  ["University of Alabama at Birmingham", 84.8, 9],
+                  ["Emory University", 83.8, 11],
+                  ["University of Arizona", 80.8, 5],
+                  ["Albert Einstein College of Medicine", 79.7, 3],
+                  ["Stanford University", 78.2, 13],
+                  ["University of Michigan", 74.4, 10],
+                  ["Mayo Clinic - Phoenix", 72.7, 7],
+                  ["Columbia University", 72.2, 12],
+                  ["Yale University", 70.8, 5]
+            ],
+            "mean_h": [
+                  ["Cedars-Sinai Medical Center", 88.5, 4],
+                  ["University of Iowa", 39.4, 5],
+                  ["Cleveland Clinic", 39.2, 8],
+                  ["Memorial Sloan Kettering Cancer Center", 37.3, 3],
+                  ["University of Wisconsin", 32.5, 14],
+                  ["University of Maryland", 32.3, 3],
+                  ["University of Texas MD Anderson Cancer Center", 26.7, 17],
+                  ["Massachusetts General Hospital (Harvard)", 26.0, 16],
+                  ["University of Arizona", 25.2, 5],
+                  ["Washington University in St. Louis", 24.0, 15],
+                  ["Case Western Reserve University", 23.0, 3],
+                  ["University of Virginia", 22.3, 9],
+                  ["Albert Einstein College of Medicine", 22.0, 3],
+                  ["Medical University of South Carolina", 21.9, 10],
+                  ["Mayo Clinic - Rochester", 21.6, 8],
+                  ["Emory University", 21.4, 11],
+                  ["Stanford University", 20.2, 13],
+                  ["University of Washington", 19.3, 10],
+                  ["Johns Hopkins University", 19.0, 6],
+                  ["University of Texas Health Science Center at San Antonio", 18.8, 4],
+                  ["Icahn School of Medicine at Mount Sinai", 18.2, 6],
+                  ["University of Texas Southwestern Medical Center", 18.0, 6],
+                  ["University of Michigan", 18.0, 10],
+                  ["Yale University", 17.8, 5],
+                  ["Duke University", 17.7, 14]
+            ],
+            "median_h": [
+                  ["Cedars-Sinai Medical Center", 75.5, 4],
+                  ["Memorial Sloan Kettering Cancer Center", 38.0, 3],
+                  ["University of Maryland", 34.0, 3],
+                  ["Cleveland Clinic", 27.0, 8],
+                  ["University of Iowa", 27.0, 5],
+                  ["University of Texas MD Anderson Cancer Center", 24.0, 17],
+                  ["Case Western Reserve University", 24.0, 3],
+                  ["University of Washington", 22.0, 10],
+                  ["Massachusetts General Hospital (Harvard)", 21.0, 16],
+                  ["University of Wisconsin", 21.0, 14],
+                  ["Brown University", 19.0, 5],
+                  ["Albert Einstein College of Medicine", 19.0, 3],
+                  ["Emory University", 19.0, 11],
+                  ["Johns Hopkins University", 17.5, 6],
+                  ["Medical University of South Carolina", 17.0, 10],
+                  ["Washington University in St. Louis", 16.0, 15],
+                  ["Icahn School of Medicine at Mount Sinai", 16.0, 6],
+                  ["University of Texas Health Science Center at San Antonio", 15.0, 4],
+                  ["University of Pennsylvania", 14.0, 22],
+                  ["Mayo Clinic - Rochester", 13.5, 8],
+                  ["Mayo Clinic - Phoenix", 13.0, 7],
+                  ["Duke University", 13.0, 14],
+                  ["University of Chicago", 13.0, 4],
+                  ["Stanford University", 13.0, 13],
+                  ["Baylor College of Medicine", 12.0, 4]
+            ]
+      }
+  },
+  "Neurointerventional": {
+      "total_faculty": 235,
+      "total_institutions": 98,
+      "rankings": {
+            "papers": [
+                  ["Mayo Clinic - Rochester", 2573, 6],
+                  ["University of California, Los Angeles", 1357, 6],
+                  ["University of Pittsburgh", 1272, 5],
+                  ["Massachusetts General Hospital (Harvard)", 1193, 3],
+                  ["Icahn School of Medicine at Mount Sinai", 992, 11],
+                  ["Stanford University", 794, 4],
+                  ["University of Virginia", 752, 6],
+                  ["Northwestern University", 629, 8],
+                  ["NYU Langone Health", 627, 5],
+                  ["University of Iowa", 600, 3],
+                  ["University of Massachusetts", 570, 3],
+                  ["Emory University", 568, 4],
+                  ["University of California, San Francisco", 500, 4],
+                  ["University of Maryland", 451, 3],
+                  ["University of South Florida", 450, 4],
+                  ["West Virginia University", 435, 4],
+                  ["Yale University", 428, 4],
+                  ["University of Washington", 399, 3],
+                  ["University of Pennsylvania", 397, 3],
+                  ["Duke University", 359, 3],
+                  ["Cleveland Clinic", 350, 6],
+                  ["Stony Brook University", 349, 1],
+                  ["Boston University", 325, 2],
+                  ["Weill Cornell Medicine", 308, 2],
+                  ["Johns Hopkins University", 305, 1]
+            ],
+            "citations": [
+                  ["Mayo Clinic - Rochester", 100389, 6],
+                  ["University of California, Los Angeles", 94180, 6],
+                  ["University of Pittsburgh", 57322, 5],
+                  ["Stanford University", 48493, 4],
+                  ["University of Virginia", 42864, 6],
+                  ["Massachusetts General Hospital (Harvard)", 38233, 3],
+                  ["Icahn School of Medicine at Mount Sinai", 32333, 11],
+                  ["University of Washington", 25628, 3],
+                  ["Stony Brook University", 21107, 1],
+                  ["Weill Cornell Medicine", 20364, 2],
+                  ["Northwestern University", 20332, 8],
+                  ["Emory University", 19955, 4],
+                  ["Brown University", 19553, 5],
+                  ["NYU Langone Health", 19154, 5],
+                  ["Cleveland Clinic", 17569, 6],
+                  ["University of Iowa", 16300, 3],
+                  ["University of Texas Southwestern Medical Center", 15444, 4],
+                  ["University of Missouri", 14890, 1],
+                  ["University of Pennsylvania", 13837, 3],
+                  ["University of Massachusetts", 13106, 3],
+                  ["University of California, San Francisco", 12895, 4],
+                  ["University of South Carolina", 11827, 4],
+                  ["Duke University", 11742, 3],
+                  ["Tufts University", 11584, 1],
+                  ["University of Maryland", 11310, 3]
+            ],
+            "papers_per_faculty": [
+                  ["Mayo Clinic - Rochester", 428.8, 6],
+                  ["Massachusetts General Hospital (Harvard)", 397.7, 3],
+                  ["University of Pittsburgh", 254.4, 5],
+                  ["University of California, Los Angeles", 226.2, 6],
+                  ["University of Iowa", 200.0, 3],
+                  ["Stanford University", 198.5, 4],
+                  ["University of Massachusetts", 190.0, 3],
+                  ["University of Maryland", 150.3, 3],
+                  ["Emory University", 142.0, 4],
+                  ["University of Washington", 133.0, 3],
+                  ["University of Pennsylvania", 132.3, 3],
+                  ["NYU Langone Health", 125.4, 5],
+                  ["University of Virginia", 125.3, 6],
+                  ["University of California, San Francisco", 125.0, 4],
+                  ["Duke University", 119.7, 3],
+                  ["University of South Florida", 112.5, 4],
+                  ["West Virginia University", 108.8, 4],
+                  ["Yale University", 107.0, 4],
+                  ["University of Michigan", 92.0, 3],
+                  ["Icahn School of Medicine at Mount Sinai", 90.2, 11],
+                  ["Columbia University", 89.7, 3],
+                  ["Northwestern University", 78.6, 8],
+                  ["University of South Carolina", 68.0, 4],
+                  ["Cleveland Clinic", 58.3, 6],
+                  ["Northwell Health", 56.7, 3]
+            ],
+            "mean_h": [
+                  ["Mayo Clinic - Rochester", 55.8, 6],
+                  ["University of California, Los Angeles", 52.0, 6],
+                  ["Massachusetts General Hospital (Harvard)", 49.3, 3],
+                  ["Stanford University", 44.5, 4],
+                  ["University of Pittsburgh", 40.0, 5],
+                  ["University of Pennsylvania", 31.7, 3],
+                  ["Duke University", 31.7, 3],
+                  ["University of Washington", 31.0, 3],
+                  ["University of Iowa", 30.3, 3],
+                  ["University of Virginia", 29.8, 6],
+                  ["Emory University", 29.8, 4],
+                  ["University of Massachusetts", 29.3, 3],
+                  ["University of Maryland", 26.3, 3],
+                  ["NYU Langone Health", 25.4, 5],
+                  ["University of Texas Southwestern Medical Center", 24.5, 4],
+                  ["University of California, San Francisco", 23.8, 4],
+                  ["Columbia University", 21.0, 3],
+                  ["University of South Florida", 20.8, 4],
+                  ["Northwestern University", 20.5, 8],
+                  ["Icahn School of Medicine at Mount Sinai", 20.3, 11],
+                  ["University of South Carolina", 20.2, 4],
+                  ["West Virginia University", 17.0, 4],
+                  ["University of Michigan", 16.7, 3],
+                  ["Cleveland Clinic", 16.2, 6],
+                  ["Indiana University", 14.7, 3]
+            ],
+            "median_h": [
+                  ["Mayo Clinic - Rochester", 60.5, 6],
+                  ["University of California, Los Angeles", 54.5, 6],
+                  ["Stanford University", 41.5, 4],
+                  ["Massachusetts General Hospital (Harvard)", 37.0, 3],
+                  ["University of Pennsylvania", 37.0, 3],
+                  ["University of Iowa", 33.0, 3],
+                  ["NYU Langone Health", 32.0, 5],
+                  ["Duke University", 30.0, 3],
+                  ["University of Massachusetts", 29.0, 3],
+                  ["University of Washington", 28.0, 3],
+                  ["University of Texas Southwestern Medical Center", 28.0, 4],
+                  ["University of California, San Francisco", 26.0, 4],
+                  ["Emory University", 24.5, 4],
+                  ["University of Virginia", 22.5, 6],
+                  ["University of Pittsburgh", 21.0, 5],
+                  ["Northwestern University", 18.0, 8],
+                  ["Indiana University", 18.0, 3],
+                  ["University of South Florida", 17.0, 4],
+                  ["University of Maryland", 17.0, 3],
+                  ["University of Michigan", 15.0, 3],
+                  ["Icahn School of Medicine at Mount Sinai", 14.0, 11],
+                  ["University of South Carolina", 13.5, 4],
+                  ["Texas Tech University Health Sciences Center", 12.5, 4],
+                  ["West Virginia University", 12.0, 4],
+                  ["Cleveland Clinic", 11.5, 6]
+            ]
+      }
+  },
+  "Body Imaging Combined": {
+      "total_faculty": 1940,
+      "total_institutions": 105,
+      "rankings": {
+            "papers": [
+                  ["Mayo Clinic - Rochester", 6691, 87],
+                  ["University of Texas MD Anderson Cancer Center", 5905, 83],
+                  ["Brigham and Women's Hospital (Harvard)", 4445, 51],
+                  ["Massachusetts General Hospital (Harvard)", 4152, 33],
+                  ["University of Wisconsin", 4028, 33],
+                  ["Johns Hopkins University", 3836, 25],
+                  ["University of Pennsylvania", 3152, 51],
+                  ["NYU Langone Health", 3078, 96],
+                  ["University of Washington", 2765, 36],
+                  ["Washington University in St. Louis", 2633, 33],
+                  ["Cleveland Clinic", 2577, 29],
+                  ["Memorial Sloan Kettering Cancer Center", 2348, 69],
+                  ["Cedars-Sinai Medical Center", 2314, 5],
+                  ["University of Michigan", 2046, 41],
+                  ["Duke University", 2038, 30],
+                  ["Weill Cornell Medicine", 1921, 47],
+                  ["Stanford University", 1745, 32],
+                  ["University of Alabama at Birmingham", 1562, 23],
+                  ["University of Iowa", 1550, 15],
+                  ["University of Texas Southwestern Medical Center", 1527, 33],
+                  ["Mayo Clinic - Phoenix", 1446, 16],
+                  ["Emory University", 1344, 32],
+                  ["Northwestern University", 1287, 26],
+                  ["University of California, San Francisco", 1245, 30],
+                  ["Case Western Reserve University", 1218, 9]
+            ],
+            "citations": [
+                  ["University of Texas MD Anderson Cancer Center", 216836, 83],
+                  ["Brigham and Women's Hospital (Harvard)", 212392, 51],
+                  ["Mayo Clinic - Rochester", 212367, 87],
+                  ["University of Wisconsin", 201996, 33],
+                  ["Cedars-Sinai Medical Center", 174129, 5],
+                  ["Massachusetts General Hospital (Harvard)", 173110, 33],
+                  ["Johns Hopkins University", 157120, 25],
+                  ["University of Pennsylvania", 136933, 51],
+                  ["Memorial Sloan Kettering Cancer Center", 119536, 69],
+                  ["Cleveland Clinic", 118355, 29],
+                  ["University of Washington", 114828, 36],
+                  ["NYU Langone Health", 111506, 96],
+                  ["University of Michigan", 88833, 41],
+                  ["Washington University in St. Louis", 83984, 33],
+                  ["Duke University", 81698, 30],
+                  ["Stanford University", 71635, 32],
+                  ["Weill Cornell Medicine", 65929, 47],
+                  ["University of Iowa", 64045, 15],
+                  ["University of Alabama at Birmingham", 59323, 23],
+                  ["University of California, Los Angeles", 57413, 34],
+                  ["University of Texas Southwestern Medical Center", 51772, 33],
+                  ["University of Virginia", 51514, 17],
+                  ["Vanderbilt University", 49156, 32],
+                  ["Emory University", 48407, 32],
+                  ["Icahn School of Medicine at Mount Sinai", 45477, 20]
+            ],
+            "papers_per_faculty": [
+                  ["Cedars-Sinai Medical Center", 462.8, 5],
+                  ["Johns Hopkins University", 153.4, 25],
+                  ["Case Western Reserve University", 135.3, 9],
+                  ["Massachusetts General Hospital (Harvard)", 125.8, 33],
+                  ["University of Wisconsin", 122.1, 33],
+                  ["University of Iowa", 103.3, 15],
+                  ["University of Maryland", 100.7, 7],
+                  ["Mayo Clinic - Phoenix", 90.4, 16],
+                  ["Cleveland Clinic", 88.9, 29],
+                  ["Brigham and Women's Hospital (Harvard)", 87.2, 51],
+                  ["George Washington University", 81.2, 4],
+                  ["Washington University in St. Louis", 79.8, 33],
+                  ["Mayo Clinic - Rochester", 76.9, 87],
+                  ["University of Washington", 76.8, 36],
+                  ["University of Chicago", 71.5, 11],
+                  ["University of Texas MD Anderson Cancer Center", 71.1, 83],
+                  ["Duke University", 67.9, 30],
+                  ["University of Alabama at Birmingham", 67.9, 23],
+                  ["University of Florida", 65.5, 13],
+                  ["Medical University of South Carolina", 65.1, 16],
+                  ["University of Virginia", 63.8, 17],
+                  ["University of Pennsylvania", 61.8, 51],
+                  ["Tulane University", 60.8, 5],
+                  ["University of Minnesota", 56.4, 5],
+                  ["Stanford University", 54.5, 32]
+            ],
+            "mean_h": [
+                  ["Cedars-Sinai Medical Center", 79.0, 5],
+                  ["Massachusetts General Hospital (Harvard)", 27.9, 33],
+                  ["Case Western Reserve University", 27.8, 9],
+                  ["Johns Hopkins University", 26.0, 25],
+                  ["University of Wisconsin", 25.2, 33],
+                  ["George Washington University", 23.8, 4],
+                  ["University of Maryland", 22.7, 7],
+                  ["Brigham and Women's Hospital (Harvard)", 22.6, 51],
+                  ["Cleveland Clinic", 21.8, 29],
+                  ["University of Iowa", 21.7, 15],
+                  ["Mayo Clinic - Phoenix", 20.7, 16],
+                  ["University of Washington", 20.3, 36],
+                  ["University of Texas MD Anderson Cancer Center", 20.2, 83],
+                  ["Duke University", 20.1, 30],
+                  ["Mayo Clinic - Rochester", 19.8, 87],
+                  ["Washington University in St. Louis", 17.6, 33],
+                  ["University of Minnesota", 17.4, 5],
+                  ["Medical University of South Carolina", 16.8, 16],
+                  ["University of Virginia", 16.2, 17],
+                  ["University of Alabama at Birmingham", 16.0, 23],
+                  ["University of Chicago", 15.8, 11],
+                  ["Thomas Jefferson University", 15.7, 6],
+                  ["University of Pennsylvania", 15.6, 51],
+                  ["University of Texas Health Science Center at San Antonio", 15.6, 11],
+                  ["Tulane University", 15.2, 5]
+            ],
+            "median_h": [
+                  ["Cedars-Sinai Medical Center", 65.0, 5],
+                  ["Case Western Reserve University", 24.0, 9],
+                  ["Johns Hopkins University", 22.0, 25],
+                  ["Massachusetts General Hospital (Harvard)", 21.0, 33],
+                  ["George Washington University", 19.0, 4],
+                  ["University of Texas MD Anderson Cancer Center", 19.0, 83],
+                  ["Duke University", 15.5, 30],
+                  ["Brigham and Women's Hospital (Harvard)", 15.5, 51],
+                  ["Mayo Clinic - Rochester", 15.0, 87],
+                  ["Mayo Clinic - Phoenix", 15.0, 16],
+                  ["University of Washington", 15.0, 36],
+                  ["Cleveland Clinic", 14.0, 29],
+                  ["Medical University of South Carolina", 13.5, 16],
+                  ["University of California, San Francisco", 13.5, 30],
+                  ["University of Minnesota", 13.0, 5],
+                  ["Washington University in St. Louis", 13.0, 33],
+                  ["University of Wisconsin", 13.0, 33],
+                  ["University of Maryland", 12.0, 7],
+                  ["University of Iowa", 12.0, 15],
+                  ["Mayo Clinic - Jacksonville", 12.0, 19],
+                  ["University of Texas Health Science Center at San Antonio", 12.0, 11],
+                  ["Loyola University Chicago", 11.5, 8],
+                  ["University of Michigan", 11.0, 41],
+                  ["Boston University", 11.0, 8],
+                  ["University of Chicago", 11.0, 11]
+            ]
+      }
+  },
+  "Emergency Radiology": {
+      "total_faculty": 464,
+      "total_institutions": 67,
+      "rankings": {
+            "papers": [
+                  ["Mayo Clinic - Rochester", 1011, 22],
+                  ["Brigham and Women's Hospital (Harvard)", 836, 20],
+                  ["Massachusetts General Hospital (Harvard)", 827, 8],
+                  ["Yale University", 670, 19],
+                  ["University of Washington", 507, 11],
+                  ["NYU Langone Health", 432, 32],
+                  ["University of Maryland", 411, 9],
+                  ["Indiana University", 362, 32],
+                  ["Emory University", 354, 29],
+                  ["Boston University", 274, 3],
+                  ["University of California, San Francisco", 267, 6],
+                  ["Brown University", 225, 11],
+                  ["University of Southern California", 187, 4],
+                  ["Washington University in St. Louis", 180, 3],
+                  ["Northwell Health", 176, 14],
+                  ["University of California, Los Angeles", 168, 17],
+                  ["Ohio State University", 168, 9],
+                  ["University of Colorado", 161, 10],
+                  ["Penn State College of Medicine", 156, 6],
+                  ["University of Massachusetts", 154, 7],
+                  ["University of Alabama at Birmingham", 147, 5],
+                  ["Tufts University", 147, 2],
+                  ["University of Miami", 144, 5],
+                  ["University of Michigan", 142, 7],
+                  ["Mayo Clinic - Phoenix", 140, 5]
+            ],
+            "citations": [
+                  ["Massachusetts General Hospital (Harvard)", 30128, 8],
+                  ["Mayo Clinic - Rochester", 22486, 22],
+                  ["NYU Langone Health", 20184, 32],
+                  ["Brigham and Women's Hospital (Harvard)", 19246, 20],
+                  ["Brown University", 15148, 11],
+                  ["Yale University", 11934, 19],
+                  ["University of Michigan", 10286, 7],
+                  ["University of Maryland", 9919, 9],
+                  ["University of Washington", 9563, 11],
+                  ["Emory University", 8927, 29],
+                  ["University of California, San Francisco", 6961, 6],
+                  ["Indiana University", 6922, 32],
+                  ["Boston University", 6507, 3],
+                  ["University of California, Los Angeles", 5555, 17],
+                  ["Tufts University", 5282, 2],
+                  ["Ohio State University", 4820, 9],
+                  ["University of Miami", 4671, 5],
+                  ["Northwell Health", 4515, 14],
+                  ["University of Southern California", 4089, 4],
+                  ["University of Colorado", 3961, 10],
+                  ["Albert Einstein College of Medicine", 3948, 5],
+                  ["University of Alabama at Birmingham", 3725, 5],
+                  ["Washington University in St. Louis", 3246, 3],
+                  ["University of Massachusetts", 2526, 7],
+                  ["University of Rochester", 2415, 8]
+            ],
+            "papers_per_faculty": [
+                  ["Massachusetts General Hospital (Harvard)", 103.4, 8],
+                  ["Boston University", 91.3, 3],
+                  ["Washington University in St. Louis", 60.0, 3],
+                  ["University of Southern California", 46.8, 4],
+                  ["University of Washington", 46.1, 11],
+                  ["Mayo Clinic - Rochester", 46.0, 22],
+                  ["University of Maryland", 45.7, 9],
+                  ["University of California, San Francisco", 44.5, 6],
+                  ["Brigham and Women's Hospital (Harvard)", 41.8, 20],
+                  ["Yale University", 35.3, 19],
+                  ["Children's Hospital of Philadelphia", 31.2, 4],
+                  ["University of Alabama at Birmingham", 29.4, 5],
+                  ["University of Miami", 28.8, 5],
+                  ["Mayo Clinic - Phoenix", 28.0, 5],
+                  ["Penn State College of Medicine", 26.0, 6],
+                  ["Albert Einstein College of Medicine", 24.0, 5],
+                  ["University of Massachusetts", 22.0, 7],
+                  ["Brown University", 20.5, 11],
+                  ["University of Michigan", 20.3, 7],
+                  ["Ohio State University", 18.7, 9],
+                  ["Geisinger", 16.4, 8],
+                  ["Cleveland Clinic", 16.3, 3],
+                  ["University of Colorado", 16.1, 10],
+                  ["University of Arizona", 14.7, 7],
+                  ["Baylor College of Medicine", 14.0, 5]
+            ],
+            "mean_h": [
+                  ["Massachusetts General Hospital (Harvard)", 25.0, 8],
+                  ["Boston University", 24.0, 3],
+                  ["University of Maryland", 15.9, 9],
+                  ["University of Southern California", 15.5, 4],
+                  ["Mayo Clinic - Rochester", 14.0, 22],
+                  ["Washington University in St. Louis", 12.7, 3],
+                  ["University of California, San Francisco", 12.5, 6],
+                  ["University of Washington", 12.4, 11],
+                  ["Brigham and Women's Hospital (Harvard)", 12.3, 20],
+                  ["University of Alabama at Birmingham", 12.0, 5],
+                  ["University of Miami", 11.6, 5],
+                  ["Albert Einstein College of Medicine", 11.0, 5],
+                  ["Penn State College of Medicine", 10.0, 6],
+                  ["Mayo Clinic - Phoenix", 9.4, 5],
+                  ["Yale University", 9.2, 19],
+                  ["Brown University", 9.0, 11],
+                  ["Children's Hospital of Philadelphia", 8.5, 4],
+                  ["University of Michigan", 8.4, 7],
+                  ["University of Massachusetts", 7.7, 7],
+                  ["University of Rochester", 7.0, 8],
+                  ["Cleveland Clinic", 7.0, 3],
+                  ["Ohio State University", 6.9, 9],
+                  ["University of California, Los Angeles", 6.7, 17],
+                  ["Northwell Health", 6.5, 14],
+                  ["University of Colorado", 6.4, 10]
+            ],
+            "median_h": [
+                  ["Boston University", 22.0, 3],
+                  ["Massachusetts General Hospital (Harvard)", 20.5, 8],
+                  ["University of Maryland", 19.0, 9],
+                  ["University of Southern California", 17.0, 4],
+                  ["Mayo Clinic - Phoenix", 13.0, 5],
+                  ["Washington University in St. Louis", 12.0, 3],
+                  ["Mayo Clinic - Rochester", 12.0, 22],
+                  ["Children's Hospital of Philadelphia", 10.5, 4],
+                  ["University of Washington", 10.0, 11],
+                  ["Brigham and Women's Hospital (Harvard)", 9.0, 20],
+                  ["University of Miami", 8.0, 5],
+                  ["University of Alabama at Birmingham", 8.0, 5],
+                  ["University of Cincinnati", 7.0, 3],
+                  ["Yale University", 7.0, 19],
+                  ["Cleveland Clinic", 7.0, 3],
+                  ["Penn State College of Medicine", 6.5, 6],
+                  ["Albert Einstein College of Medicine", 6.0, 5],
+                  ["University of Massachusetts", 6.0, 7],
+                  ["University of California, Los Angeles", 6.0, 17],
+                  ["University of Texas Southwestern Medical Center", 5.0, 4],
+                  ["University of California, San Francisco", 4.5, 6],
+                  ["Northwell Health", 4.0, 14],
+                  ["University of Arizona", 4.0, 7],
+                  ["Emory University", 4.0, 29],
+                  ["University of Utah", 4.0, 3]
+            ]
+      }
+  },
+  "Overall": {
+      "total_faculty": 7307,
+      "total_institutions": 183,
+      "rankings": {
+            "papers": [
+                  ["Mayo Clinic - Rochester", 18515, 184],
+                  ["Massachusetts General Hospital (Harvard)", 18176, 201],
+                  ["University of Pennsylvania", 14144, 193],
+                  ["University of Texas MD Anderson Cancer Center", 11666, 170],
+                  ["University of Washington", 9655, 152],
+                  ["Stanford University", 9309, 127],
+                  ["Johns Hopkins University", 8865, 85],
+                  ["NYU Langone Health", 8482, 269],
+                  ["University of California, San Francisco", 8017, 105],
+                  ["Washington University in St. Louis", 7832, 114],
+                  ["University of Wisconsin", 7622, 107],
+                  ["Emory University", 7435, 189],
+                  ["Brigham and Women's Hospital (Harvard)", 7410, 100],
+                  ["University of Texas Southwestern Medical Center", 7372, 142],
+                  ["University of California, Los Angeles", 7174, 132],
+                  ["University of Michigan", 6533, 118],
+                  ["Duke University", 6351, 98],
+                  ["Memorial Sloan Kettering Cancer Center", 5790, 135],
+                  ["Northwestern University", 5255, 125],
+                  ["Weill Cornell Medicine", 5153, 128],
+                  ["Yale University", 5113, 113],
+                  ["Cleveland Clinic", 5012, 100],
+                  ["University of Pittsburgh", 4858, 105],
+                  ["University of Iowa", 4610, 61],
+                  ["University of Virginia", 4196, 71]
+            ],
+            "citations": [
+                  ["Massachusetts General Hospital (Harvard)", 808688, 201],
+                  ["Mayo Clinic - Rochester", 766782, 184],
+                  ["University of Pennsylvania", 509764, 193],
+                  ["University of Texas MD Anderson Cancer Center", 418940, 170],
+                  ["Stanford University", 394983, 127],
+                  ["Brigham and Women's Hospital (Harvard)", 375266, 100],
+                  ["Washington University in St. Louis", 359343, 114],
+                  ["Johns Hopkins University", 359284, 85],
+                  ["University of Washington", 353953, 152],
+                  ["University of California, Los Angeles", 350487, 132],
+                  ["University of California, San Francisco", 347944, 105],
+                  ["University of Wisconsin", 331166, 107],
+                  ["NYU Langone Health", 304333, 269],
+                  ["University of Texas Southwestern Medical Center", 282054, 142],
+                  ["University of Michigan", 258653, 118],
+                  ["Memorial Sloan Kettering Cancer Center", 256239, 135],
+                  ["Emory University", 244636, 189],
+                  ["Duke University", 244629, 98],
+                  ["Cleveland Clinic", 201541, 100],
+                  ["University of Virginia", 197902, 71],
+                  ["Cedars-Sinai Medical Center", 194757, 29],
+                  ["University of Pittsburgh", 194026, 105],
+                  ["Northwestern University", 188985, 125],
+                  ["Yale University", 181147, 113],
+                  ["Weill Cornell Medicine", 178646, 128]
+            ],
+            "papers_per_faculty": [
+                  ["University of Central Florida", 116.7, 7],
+                  ["Johns Hopkins University", 104.3, 85],
+                  ["Mayo Clinic - Rochester", 100.6, 184],
+                  ["Cedars-Sinai Medical Center", 100.6, 29],
+                  ["Massachusetts General Hospital (Harvard)", 90.4, 201],
+                  ["University of Illinois at Chicago", 88.1, 17],
+                  ["Roswell Park Comprehensive Cancer Center", 86.6, 11],
+                  ["National Institutes of Health", 82.3, 3],
+                  ["Boston Children's Hospital (Harvard)", 80.8, 4],
+                  ["University of California, San Francisco", 76.4, 105],
+                  ["University of Iowa", 75.6, 61],
+                  ["Brigham and Women's Hospital (Harvard)", 74.1, 100],
+                  ["Stanford University", 73.3, 127],
+                  ["University of Pennsylvania", 73.3, 193],
+                  ["University of Wisconsin", 71.2, 107],
+                  ["University of Maryland", 69.1, 46],
+                  ["Washington University in St. Louis", 68.7, 114],
+                  ["University of Texas MD Anderson Cancer Center", 68.6, 170],
+                  ["Duke University", 64.8, 98],
+                  ["University of Washington", 63.5, 152],
+                  ["University of Southern California", 60.9, 46],
+                  ["University of Virginia", 59.1, 71],
+                  ["Mayo Clinic - Phoenix", 58.8, 53],
+                  ["University of Chicago", 58.3, 41],
+                  ["University of Michigan", 55.4, 118]
+            ],
+            "mean_h": [
+                  ["National Institutes of Health", 27.3, 3],
+                  ["University of Central Florida", 26.7, 7],
+                  ["Cedars-Sinai Medical Center", 23.3, 29],
+                  ["Mayo Clinic - Rochester", 22.7, 184],
+                  ["Massachusetts General Hospital (Harvard)", 22.5, 201],
+                  ["Johns Hopkins University", 22.0, 85],
+                  ["Stanford University", 20.6, 127],
+                  ["University of California, San Francisco", 20.4, 105],
+                  ["Brigham and Women's Hospital (Harvard)", 19.9, 100],
+                  ["University of Texas MD Anderson Cancer Center", 19.3, 170],
+                  ["Duke University", 18.6, 98],
+                  ["University of Pennsylvania", 18.3, 193],
+                  ["University of Maryland", 18.0, 46],
+                  ["University of Iowa", 17.9, 61],
+                  ["University of Wisconsin", 17.8, 107],
+                  ["Boston Children's Hospital (Harvard)", 17.5, 4],
+                  ["Washington University in St. Louis", 17.3, 114],
+                  ["University of Washington", 16.9, 152],
+                  ["University of California, Los Angeles", 16.2, 132],
+                  ["University of South Carolina", 16.2, 6],
+                  ["Mayo Clinic - Phoenix", 16.0, 53],
+                  ["University of Michigan", 15.9, 118],
+                  ["University of Virginia", 15.4, 71],
+                  ["Thomas Jefferson University", 15.3, 41],
+                  ["University of Texas Southwestern Medical Center", 15.0, 142]
+            ],
+            "median_h": [
+                  ["Massachusetts General Hospital (Harvard)", 17.0, 201],
+                  ["Mayo Clinic - Rochester", 17.0, 184],
+                  ["Johns Hopkins University", 17.0, 85],
+                  ["University of Texas MD Anderson Cancer Center", 17.0, 170],
+                  ["Boston Children's Hospital (Harvard)", 16.5, 4],
+                  ["University of Central Florida", 16.0, 7],
+                  ["University of California, San Francisco", 15.0, 105],
+                  ["Stanford University", 14.0, 127],
+                  ["University of Maryland", 14.0, 46],
+                  ["Mayo Clinic - Phoenix", 13.0, 53],
+                  ["Duke University", 13.0, 98],
+                  ["Houston Methodist", 12.5, 9],
+                  ["University of Pennsylvania", 12.5, 193],
+                  ["University of Iowa", 12.0, 61],
+                  ["University of Washington", 12.0, 152],
+                  ["Brigham and Women's Hospital (Harvard)", 12.0, 100],
+                  ["University of Wisconsin", 11.0, 107],
+                  ["University of California, San Diego", 11.0, 69],
+                  ["University of Michigan", 11.0, 118],
+                  ["University of Southern California", 11.0, 46],
+                  ["George Washington University", 11.0, 50],
+                  ["Northeast Ohio Medical University", 11.0, 12],
+                  ["Mayo Clinic - Jacksonville", 11.0, 52],
+                  ["Albert Einstein College of Medicine", 11.0, 51],
+                  ["Memorial Sloan Kettering Cancer Center", 10.0, 135]
+            ]
+      }
+  },
+  "NIH Funding": {
+      "total_institutions": 66,
+      "rankings": {
+            "funding": [
+                  [
+                        "University of Pennsylvania",
+                        46997992,
+                        0
+                  ],
+                  [
+                        "Washington University in St. Louis",
+                        44350990,
+                        0
+                  ],
+                  [
+                        "Yale University",
+                        38150342,
+                        0
+                  ],
+                  [
+                        "Stanford University",
+                        35352212,
+                        0
+                  ],
+                  [
+                        "University of California, San Francisco",
+                        30918150,
+                        0
+                  ],
+                  [
+                        "Johns Hopkins University",
+                        27041563,
+                        0
+                  ],
+                  [
+                        "Weill Cornell Medicine",
+                        26065926,
+                        0
+                  ],
+                  [
+                        "NYU Langone Health",
+                        26026240,
+                        0
+                  ],
+                  [
+                        "University of Wisconsin",
+                        21121651,
+                        0
+                  ],
+                  [
+                        "University of Pittsburgh",
+                        19164922,
+                        0
+                  ],
+                  [
+                        "Columbia University",
+                        16973210,
+                        0
+                  ],
+                  [
+                        "University of Michigan",
+                        16533953,
+                        0
+                  ],
+                  [
+                        "University of Washington",
+                        16447339,
+                        0
+                  ],
+                  [
+                        "Emory University",
+                        16429489,
+                        0
+                  ],
+                  [
+                        "Duke University",
+                        16329456,
+                        0
+                  ],
+                  [
+                        "Northwestern University",
+                        15864097,
+                        0
+                  ],
+                  [
+                        "University of Texas Southwestern Medical Center",
+                        15631733,
+                        0
+                  ],
+                  [
+                        "University of California, San Diego",
+                        15577676,
+                        0
+                  ],
+                  [
+                        "Vanderbilt University",
+                        14331338,
+                        0
+                  ],
+                  [
+                        "Icahn School of Medicine at Mount Sinai",
+                        13494518,
+                        0
+                  ],
+                  [
+                        "Wayne State University",
+                        13040076,
+                        0
+                  ],
+                  [
+                        "University of North Carolina at Chapel Hill",
+                        12793076,
+                        0
+                  ],
+                  [
+                        "University of Minnesota",
+                        12680865,
+                        0
+                  ],
+                  [
+                        "University of Maryland",
+                        12602858,
+                        0
+                  ],
+                  [
+                        "University of California, Los Angeles",
+                        11290166,
+                        0
+                  ]
+            ]
+      }
+}
+};
+    
+    const metricLabels = {
+        'papers': 'Total Papers',
+        'citations': 'Total Citations',
+        'papers_per_faculty': 'Papers Per Faculty',
+        'mean_h': 'Mean H-Index',
+        'median_h': 'Median H-Index',
+        'funding': 'NIH Funding ($)'
+    };
+    
+    const subspecialtyBadges = {
+        'Overall': 'badge-overall',
+        'Neuroradiology': 'badge-neuro',
+        'MSK': 'badge-msk',
+        'Breast Imaging': 'badge-breast',
+        'Nuclear Medicine': 'badge-nuclear',
+        'Pediatric Radiology': 'badge-peds',
+        'Interventional Radiology': 'badge-ir',
+        'Abdominal Imaging': 'badge-abd',
+        'Cardiothoracic Imaging': 'badge-ctr',
+        'Neurointerventional': 'badge-ninr',
+        'Body Imaging Combined': 'badge-body',
+        'Emergency Radiology': 'badge-emergency',
+        'NIH Funding': 'badge-nih'
+    };
+    
+
+    const NIH_EXCLUDED = {"Massachusetts General Hospital (Harvard)":"Harvard affiliate: BRIMR credits grants to hospital","Brigham and Women's Hospital (Harvard)":"Harvard affiliate: BRIMR credits grants to hospital","Beth Israel Deaconess Medical Center (Harvard)":"Harvard affiliate: BRIMR credits grants to hospital","Boston Children's Hospital (Harvard)":"Harvard affiliate: BRIMR credits grants to hospital","Mayo Clinic - Rochester":"Not classified as medical school in NIH/BRIMR","Mayo Clinic - Jacksonville":"Not classified as medical school in NIH/BRIMR","Mayo Clinic - Phoenix":"Not classified as medical school in NIH/BRIMR","Cleveland Clinic":"Combined with Case Western Reserve in BRIMR","Memorial Sloan Kettering Cancer Center":"Classified as hospital, not medical school, in BRIMR","University of Texas MD Anderson Cancer Center":"Classified as hospital, not medical school, in BRIMR"};
+
+    const subspecialtySelect = document.getElementById('subspecialty-select');
+    const metricSelect = document.getElementById('metric-select');
+    
+    subspecialtySelect.addEventListener('change', updateResults);
+    metricSelect.addEventListener('change', updateResults);
+    
+    function formatValue(value, metric) {
+        if (value === null || value === undefined) return 'N/A';
+        if (metric === 'funding') {
+            return '$' + parseInt(value).toLocaleString();
+        }
+        if (metric === 'papers' || metric === 'citations') {
+            return parseInt(value).toLocaleString();
+        }
+        return parseFloat(value).toFixed(1);
+    }
+    
+    function updateResults() {
+        const subspecialty = subspecialtySelect.value;
+        let metric = metricSelect.value;
+        const resultsContent = document.getElementById('results-content');
+        const resultsTitle = document.getElementById('results-title');
+        const resultsInfo = document.getElementById('results-info');
+        
+        // NIH Funding: can be triggered from subspecialty OR metric dropdown
+        if (subspecialty === 'NIH Funding' || metric === 'nih_funding') {
+            metric = 'funding';
+            // Switch to NIH Funding subspecialty data
+            var nihSubspecData = DATA['NIH Funding'];
+            if (!nihSubspecData) {
+                resultsContent.innerHTML = '<div class="no-data"><div class="icon">❌</div><p>No NIH data available</p></div>';
+                return;
+            }
+            
+            const badgeClass = 'badge-nih';
+            resultsTitle.innerHTML = `Top 25 by NIH Funding <span class="subspecialty-badge ${badgeClass}">BRIMR 2025</span>`;
+            resultsInfo.textContent = `${nihSubspecData.total_institutions} funded radiology departments • Source: Blue Ridge Institute for Medical Research FY2025`;
+            
+            const rankings = nihSubspecData.rankings['funding'];
+            let html = `
+                <table class="rankings-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Institution</th>
+                            <th>BRIMR Rank</th>
+                            <th>NIH Funding ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            rankings.forEach((row, index) => {
+                const rank = index + 1;
+                const institution = row[0];
+                const value = row[1];
+                
+                let rankClass = '';
+                let badgeHtml = rank;
+                if (rank === 1) { rankClass = 'rank-1'; badgeHtml = '<span class="top-badge badge-gold">1</span>'; }
+                else if (rank === 2) { rankClass = 'rank-2'; badgeHtml = '<span class="top-badge badge-silver">2</span>'; }
+                else if (rank === 3) { rankClass = 'rank-3'; badgeHtml = '<span class="top-badge badge-bronze">3</span>'; }
+                
+                html += `
+                    <tr>
+                        <td class="rank-cell ${rankClass}">${badgeHtml}</td>
+                        <td class="institution-name">${institution}</td>
+                        <td class="faculty-count">BRIMR #${rank}</td>
+                        <td class="metric-value">$${parseInt(value).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            
+            // Add excluded institutions note
+            if (typeof NIH_EXCLUDED !== 'undefined') {
+                html += '<div class="nih-note">';
+                html += '<strong>⚠️ Excluded from BRIMR rankings:</strong> ';
+                var excParts = [];
+                Object.keys(NIH_EXCLUDED).forEach(function(name) {
+                    excParts.push(name + ' (' + NIH_EXCLUDED[name] + ')');
+                });
+                html += excParts.join('; ');
+                html += '</div>';
+            }
+            
+            resultsContent.innerHTML = html;
+            return;
+        }
+        
+        const subspecData = DATA[subspecialty];
+        if (!subspecData) {
+            resultsContent.innerHTML = '<div class="no-data"><div class="icon">❌</div><p>No data available</p></div>';
+            return;
+        }
+        
+        const badgeClass = subspecialtyBadges[subspecialty] || '';
+        
+        // Handle "all" metrics view
+        if (metric === 'all') {
+            resultsTitle.innerHTML = `All Metrics <span class="subspecialty-badge ${badgeClass}">${subspecialty}</span>`;
+            resultsInfo.textContent = `${subspecData.total_faculty ? subspecData.total_faculty + ' faculty • ' : ''}${subspecData.total_institutions} institutions • Papers/Faculty and H-index metrics require min. 3 faculty`;
+            
+            const allMetrics = subspecialty === 'NIH Funding' ? ['funding'] : ['papers', 'citations', 'papers_per_faculty', 'mean_h', 'median_h'];
+            let html = '<div class="all-metrics-grid">';
+            
+            allMetrics.forEach(m => {
+                const rankings = subspecData.rankings[m];
+                if (!rankings || rankings.length === 0) return;
+                
+                html += `<div class="metric-card"><h3>${metricLabels[m]}</h3>`;
+                html += `<table class="rankings-table"><thead><tr><th>Rank</th><th>Institution</th><th>Faculty</th><th>Value</th></tr></thead><tbody>`;
+                
+                rankings.forEach((row, index) => {
+                    const rank = index + 1;
+                    const institution = row[0];
+                    const value = row[1];
+                    const faculty = row[2];
+                    
+                    let rankClass = '';
+                    let badgeHtml = rank;
+                    if (rank === 1) {
+                        rankClass = 'rank-1';
+                        badgeHtml = '<span class="top-badge badge-gold">1</span>';
+                    } else if (rank === 2) {
+                        rankClass = 'rank-2';
+                        badgeHtml = '<span class="top-badge badge-silver">2</span>';
+                    } else if (rank === 3) {
+                        rankClass = 'rank-3';
+                        badgeHtml = '<span class="top-badge badge-bronze">3</span>';
+                    }
+                    
+                    html += `<tr><td class="rank-cell ${rankClass}">${badgeHtml}</td><td class="institution-name">${institution}</td><td class="faculty-count">${subspecialty === "NIH Funding" ? "BRIMR #" + (index+1) : "n=" + parseInt(faculty)}</td><td class="metric-value">${formatValue(value, m)}</td></tr>`;
+                });
+                
+                html += '</tbody></table></div>';
+            });
+            
+            html += '</div>';
+            resultsContent.innerHTML = html;
+            return;
+        }
+        
+        // Single metric view (original behavior)
+        const rankings = subspecData.rankings[metric];
+        if (!rankings || rankings.length === 0) {
+            resultsContent.innerHTML = '<div class="no-data"><div class="icon">📭</div><p>No rankings available for this metric</p></div>';
+            return;
+        }
+        
+        resultsTitle.innerHTML = `Top 25 by ${metricLabels[metric]} <span class="subspecialty-badge ${badgeClass}">${subspecialty}</span>`;
+        
+        const minFacultyNote = (metric === 'papers_per_faculty' || metric === 'mean_h' || metric === 'median_h') 
+            ? ' (min. 3 faculty)' : '';
+        resultsInfo.textContent = `${subspecData.total_faculty ? subspecData.total_faculty + ' faculty • ' : ''}${subspecData.total_institutions} institutions${minFacultyNote}`;
+        
+        let html = `
+            <table class="rankings-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Institution</th>
+                        <th>${subspecialty === "NIH Funding" ? "BRIMR Rank" : "Faculty"}</th>
+                        <th>${subspecialty === "NIH Funding" ? "NIH Funding ($)" : metricLabels[metric]}</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        rankings.forEach((row, index) => {
+            const rank = index + 1;
+            const institution = row[0];
+            const value = row[1];
+            const faculty = row[2];
+            
+            let rankClass = '';
+            let badgeHtml = rank;
+            if (rank === 1) {
+                rankClass = 'rank-1';
+                badgeHtml = '<span class="top-badge badge-gold">1</span>';
+            } else if (rank === 2) {
+                rankClass = 'rank-2';
+                badgeHtml = '<span class="top-badge badge-silver">2</span>';
+            } else if (rank === 3) {
+                rankClass = 'rank-3';
+                badgeHtml = '<span class="top-badge badge-bronze">3</span>';
+            }
+            
+            html += `
+                <tr>
+                    <td class="rank-cell ${rankClass}">${badgeHtml}</td>
+                    <td class="institution-name">${institution}</td>
+                    <td class="faculty-count">${subspecialty === "NIH Funding" ? "BRIMR #" + (index+1) : "n=" + parseInt(faculty)}</td>
+                    <td class="metric-value">${formatValue(value, metric)}</td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table>';
+        
+        // Add excluded institutions note for NIH Funding
+        if (subspecialty === 'NIH Funding' && typeof NIH_EXCLUDED !== 'undefined') {
+            html += '<div class="nih-note">';
+            html += '<strong>⚠️ Excluded from BRIMR rankings:</strong> ';
+            var excNames = Object.keys(NIH_EXCLUDED);
+            var excParts = [];
+            excNames.forEach(function(name) {
+                excParts.push(name + ' (' + NIH_EXCLUDED[name] + ')');
+            });
+            html += excParts.join('; ');
+            html += '</div>';
+        }
+        
+        resultsContent.innerHTML = html;
+    }
+    
+    // Initial load
+    updateResults();
+    </script>
+</body>
+</html>
