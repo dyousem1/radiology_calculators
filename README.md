@@ -20,18 +20,18 @@ Compare your scholarly metrics against peers in your radiology subspecialty. Eac
 
 | Subspecialty | Last Scopus Pull | Faculty | Institutions |
 |---|---|---|---|
-| Abdominal Imaging | May 2, 2026 | 1,345 | 104 |
-| All Radiologists | May 2, 2026 | 7,035 | 165 |
-| Body Imaging Combined | May 2, 2026 | 1,901 | 105 |
-| Breast Imaging | May 2, 2026 | 869 | 110 |
-| Cardiothoracic Imaging | May 2, 2026 | 557 | 87 |
-| Emergency Radiology | May 2, 2026 | 418 | 66 |
-| Interventional Radiology | May 2, 2026 | 877 | 104 |
-| MSK Radiology | May 2, 2026 | 616 | 93 |
-| Neurointerventional Radiology | May 2, 2026 | 230 | 99 |
-| Neuroradiology | May 2, 2026 | 1,035 | 122 |
-| Nuclear Medicine | March 15, 2026 | 510 | 109 |
-| Pediatric Radiology | May 2, 2026 | 921 | 111 |
+| Abdominal Imaging | August 14, 2026 | 1,342 | 105 |
+| All Radiologists | August 14, 2026 | 7,345 | 179 |
+| Body Imaging Combined | August 14, 2026 | 1,894 | 106 |
+| Breast Imaging | August 14, 2026 | 876 | 111 |
+| Cardiothoracic Imaging | August 14, 2026 | 553 | 87 |
+| Emergency Radiology | August 14, 2026 | 421 | 66 |
+| Interventional Radiology | August 14, 2026 | 880 | 104 |
+| MSK Radiology | August 14, 2026 | 618 | 94 |
+| Neurointerventional Radiology | August 14, 2026 | 423 | 135 |
+| Neuroradiology | August 14, 2026 | 1,037 | 121 |
+| Nuclear Medicine | August 14, 2026 | 655 | 115 |
+| Pediatric Radiology | August 14, 2026 | 930 | 112 |
 
 ### Update Commitments
 
@@ -48,20 +48,20 @@ Bibliometric data are sourced exclusively from **Scopus**. Overall accuracy is e
 
 | Subspecialty | Faculty | Institutions | Status |
 |--------------|---------|--------------|--------|
-| 🫁 Abdominal Imaging | 1,345 | 104 | ✅ Live |
-| 📊 All Radiologists | 7,035 | 165 | ✅ Live |
-| 🫀 Body Imaging Combined | 1,901 | 105 | ✅ Live |
-| 🎗️ Breast Imaging | 869 | 110 | ✅ Live |
-| ❤️ Cardiothoracic Imaging | 557 | 87 | ✅ Live |
-| 🚨 Emergency Radiology | 418 | 66 | ✅ Live |
-| 🩺 Interventional Radiology | 877 | 104 | ✅ Live |
-| 🦴 MSK Radiology | 616 | 93 | ✅ Live |
-| 🔬 Neurointerventional Radiology | 230 | 99 | ✅ Live |
-| 🧠 Neuroradiology | 1,035 | 122 | ✅ Live |
-| ☢️ Nuclear Medicine | 510 | 109 | ✅ Live |
-| 👶 Pediatric Radiology | 921 | 111 | ✅ Live |
+| 🫁 Abdominal Imaging | 1,342 | 105 | ✅ Live |
+| 📊 All Radiologists | 7,345 | 179 | ✅ Live |
+| 🫀 Body Imaging Combined | 1,894 | 106 | ✅ Live |
+| 🎗️ Breast Imaging | 876 | 111 | ✅ Live |
+| ❤️ Cardiothoracic Imaging | 553 | 87 | ✅ Live |
+| 🚨 Emergency Radiology | 421 | 66 | ✅ Live |
+| 🩺 Interventional Radiology | 880 | 104 | ✅ Live |
+| 🦴 MSK Radiology | 618 | 94 | ✅ Live |
+| 🔬 Neurointerventional Radiology | 423 | 135 | ✅ Live |
+| 🧠 Neuroradiology | 1,037 | 121 | ✅ Live |
+| ☢️ Nuclear Medicine | 655 | 115 | ✅ Live |
+| 👶 Pediatric Radiology | 930 | 112 | ✅ Live |
 
-**Total: 7,378 Faculty across 166 Institutions** (7,035 unique individuals in the deduplicated All Radiologists calculator)
+**Total: 7,728 subspecialty listings across 181 Institutions** (7,345 unique individuals in the deduplicated All Radiologists calculator)
 
 ---
 
@@ -85,8 +85,8 @@ Compare any institution's rankings across all subspecialties with 5 different me
 View the top 25 ranked institutions for each subspecialty across all metrics. 
 
 **Includes Overall** tab showing combined rankings across all subspecialties:
-- 166 institutions aggregated from 10 subspecialties
-- 7,378 total faculty
+- 179 institutions aggregated from all subspecialties
+- 7,345 unique faculty
 - Mayo Clinic separated by campus (Rochester, Jacksonville, Phoenix)
 
 **Includes NIH Funding (BRIMR 2025)** tab ranking departments by NIH grant funding.
@@ -147,9 +147,16 @@ All bibliometric data is sourced from the **Scopus** database, including:
 - H-index values
 - First publication year
 
-Institution names harmonized to 166 institutions (Mayo Clinic separated into 3 campuses: Rochester, Jacksonville, Phoenix).
+Institution names harmonized to 179 institutions (Mayo Clinic separated into 3 campuses: Rochester, Jacksonville, Phoenix).
 
 ---
+
+## Recent Updates (August 2026)
+
+- **August 14, 2026 Data Refresh (master 8.8.5):** 11 calculators and the Top 25 Institutions tool repopulated from the August 14, 2026 Scopus pull. All 12 calculators, the Institution Rankings Lookup, and the Top 25 Institutions tool are on the August 14, 2026 data.
+- **H-Index basis changed:** H-index values are now computed from each author's Scopus-indexed document set (pooled across merged author profiles) rather than taken from the Scopus profile page. Values differ from profile-page h-indices for faculty with merged profiles.
+- **Neurointerventional Radiology cohort expanded** to the full 2026 neurointerventional cohort (423 practitioners), including neurosurgery- and neurology-trained neurointerventionalists.
+- **RY Metric corrected** in all calculators to Weighted Citations + (10 × Weighted Publications); previous calculator versions displayed weighted publications only.
 
 ## Recent Updates (May 2026)
 
@@ -158,7 +165,7 @@ Institution names harmonized to 166 institutions (Mayo Clinic separated into 3 c
 - **Harvard Affiliate Cleanup:** 47 misattributions corrected across MGH, BWH, BIDMC, and other Harvard-affiliated institutions.
 - **Foreign/Non-Academic Cleanup:** 13 faculty records removed (foreign institutions, private practice, non-academic).
 - **All Radiologists Calculator:** Now includes 7,035 unique faculty from 165 institutions (deduplicated from master Tab 1).
-- **Institution Rankings Lookup:** Now covers 166 unique institutions across 12 subspecialty views.
+- **Institution Rankings Lookup:** Now covers 179 unique institutions across 12 subspecialty views.
 - **Mayo Clinic split:** Continues to be tracked by campus (Rochester, Jacksonville, Phoenix).
 - **NIH Funding:** BRIMR 2025 data unchanged — 66 funded departments.
 
